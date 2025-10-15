@@ -1,0 +1,89 @@
+# Configuration for System Shop
+
+# Sleep settings
+sleep:
+  # The percentage of players in a world that need to be sleeping to skip the night. (0.5 = 50%)
+  percentage-required: 0.5
+
+# Configuration for WoW Auction House
+population:
+  # The number of items to generate when the server starts up.
+  initial-items: 1500
+  # The number of items to generate when using the /ah refill command.
+  refill-items: 1500
+  # Category population caps (as a percentage of total items).
+  # The chance for a high-tier item to become a "mythic item" with maxed-out enchants. (0.08 = 8%)
+  mythic-item-chance: 0.08
+  # Enchanted book settings
+  enchanted-books:
+    min-level: 1
+    max-level: 5
+  # Mythic item settings
+  mythic-items:
+    # Allow unsafe enchantments for mythic items.
+    allow-unsafe-enchantments: true
+    # The enchantment level multiplier for mythic items.
+    # For example, a value of 2.0 will double the enchantment level.
+    enchantment-level-multiplier: 1.5
+  # Use a value between 0 and 100.
+  category-caps:
+    weapons: 4
+    tools: 4
+    armor: 4
+    potions: 8
+    blocks: 12
+    materials: 5
+    spawners: 2
+    spawn_eggs: 3
+    enchanted_books: 4
+    legendary: 2
+    miscellaneous: 10
+  # The number of special orders to fulfill per population cycle.
+  special-orders-per-cycle: 5
+  # The price multiplier for special order items.
+  special-order-price-multiplier: 2.0
+
+# Daily Deals settings
+daily-deals:
+  # Enable or disable daily deals
+  enabled: true
+  # The number of items to be on sale for daily deals
+  deals-count: 10
+  # The discount percentage for daily deals (e.g., 0.25 for 25% off)
+  discount-percentage: 0.25
+  # Whether to refill the entire shop when rotating daily deals
+  refill-shop-on-rotate: true
+
+# Pricing settings
+pricing:
+  # Use EssentialsX's worth.yml for item pricing.
+  # If enabled, the plugin will try to use EssentialsX's worth.yml file for item prices.
+  # The path to the worth.yml file can be configured below.
+  use-essentials-worth: true
+  # The absolute path to the EssentialsX worth.yml file.
+  essentials-worth-path: "plugins/Essentials/worth.yml"
+  dynamic-pricing:
+    enabled: true
+    # The maximum stock level for an item before the price starts to drop.
+    max-stock: 100
+    # A factor that determines how much the price changes with stock.
+    # A higher value means more volatile prices.
+    price-volatility: 0.5
+
+# Server-wide Events
+events:
+  # The chance of a random event happening every second (0.01 = 1%)
+  chance: 0.01
+  # The duration of a random event in seconds
+  duration: 600
+  # The price multiplier to apply during a market crash event.
+  market-crash-multiplier: 0.8
+  # The price multiplier to apply during a market boom event.
+  market-boom-multiplier: 1.2
+
+# Consignment settings
+consignment:
+  # The fee to list an item on the auction house.
+  listing-fee: 100.0
+  # The commission percentage the auction house takes from each sale.
+  commission-percentage: 5.0

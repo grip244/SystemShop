@@ -1,0 +1,16 @@
+# A list of materials to prevent from being populated in the auction house.
+# Use the official material names from Minecraft.
+# Example: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+blacklist:
+  - "TRIAL_SPAWNER"
+  - "COMMAND_BLOCK"
+  - "REPEATING_COMMAND_BLOCK"
+  - "CHAIN_COMMAND_BLOCK"
+  - "COMMAND_BLOCK_MINECART"
+  - "STRUCTURE_BLOCK"
+  - "STRUCTURE_VOID"
+  - "JIGSAW"
+  - "BARRIER"
+  - "LIGHT"
+  - "BEDROCK"
+  - "KNOWLEDGE_BOOK"

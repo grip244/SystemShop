@@ -1,0 +1,16 @@
+name: SystemShop
+version: 1.0.1
+main: com.holyw.wowah.SystemShop
+api-version: 1.21
+author: holyw
+depend: [Vault]
+
+commands: # Changed ah to shop
+  shop:
+    description: Opens the System Shop or performs admin commands.
+    usage: /shop [help/sell/refill/purge]
+
+permissions:
+  systemshop.admin:
+    description: Allows access to admin commands like /shop purge.
+    default: op

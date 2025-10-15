@@ -1,0 +1,52 @@
+# Pricing configuration for System Shop
+
+# Material tiers define the base value of items.
+# Higher tiers have higher base prices.
+material-tiers:
+  TRASH: 10
+  COMMON: 50
+  COPPER: 100
+  UNCOMMON: 200
+  RARE: 1000
+  EPIC: 5000
+  LEGENDARY: 20000
+  MYTHIC: 100000
+
+# Assigns materials to tiers. The system checks from top to bottom.
+# Use keywords contained in the material name (e.g., 'netherite', 'diamond').
+tier-assignments:
+  - tier: MYTHIC
+    materials: [ 'dragon_egg' ]
+  - tier: LEGENDARY
+    materials: [ 'elytra', 'beacon', 'conduit', 'nether_star', 'spawn_egg' ]
+  - tier: EPIC
+    materials: [ 'netherite' ]
+  - tier: RARE
+    materials: [ 'diamond' ]
+  - tier: UNCOMMON
+    materials: [ 'gold', 'iron' ]
+  - tier: COPPER
+    materials: [ 'copper' ]
+  - tier: COMMON
+    materials: [ 'stone' ]
+  - tier: TRASH # Default/fallback tier
+    materials: [ 'wood', 'leather', 'chainmail' ]
+
+# Multipliers for specific item types.
+# Affects the base price before randomness.
+item-type-multipliers:
+  - multiplier: 1.3
+    keywords: [ 'sword', 'bow' ]
+  - multiplier: 1.1
+    keywords: [ 'pickaxe', 'axe', 'helmet', 'chestplate', 'leggings', 'boots' ]
+  - multiplier: 0.8
+    keywords: [ 'hoe', 'shovel' ]
+  - multiplier: 1.5
+    keywords: [ 'potion' ]
+
+# Specific price overrides for rare/unique items.
+# These prices are absolute and will have randomness applied between the min and max.
+# Format: MATERIAL_NAME: "min,max"
+special-overrides:
+  TRIAL_KEY: "15000,25000"
+  OMINOUS_BOTTLE: "25000,40000"

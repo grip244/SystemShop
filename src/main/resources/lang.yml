@@ -1,0 +1,70 @@
+# Language file for System Shop
+# You can use color codes with '&'.
+
+# General Messages
+plugin-enabled: "&aSystem Shop has been enabled!"
+plugin-disabled: "&eSystem Shop has been disabled!"
+no-vault: "&cDisabled due to no Vault dependency found!"
+no-permission: "&cYou do not have permission to use this command."
+console-only: "&cThis command can only be run from the console."
+player-only: "&cOnly players can use this command!"
+
+# Command Messages
+shop-refilled: "&aSystem shop refilled."
+config-reloaded: "&aSystem Shop configuration reloaded."
+player-auctions-purged: "&aAll player auctions have been purged."
+
+# Purchase Messages
+item-bought: "&aYou have bought the item for {price}!"
+not-enough-money: "&cYou don't have enough money to buy this item!"
+purchase-cancelled: "&ePurchase cancelled."
+special-order-placed: "&aYour special order for {item} has been placed."
+
+# Consignment Messages
+item-listed: "&aYou have listed the item for {price}."
+not-enough-money-for-fee: "&cYou don't have enough money to pay the listing fee."
+invalid-price: "&cInvalid price."
+
+# Sleep Messages
+sleep-success: "&eThe sun rises as enough players are sleeping."
+
+# Population Messages
+population-start: "&e[SystemShop] &6Starting population of {items} new items."
+population-finish: "&a[SystemShop] Finished populating {size} new items across all categories."
+
+# Daily Deals
+total-items-in-ah: "&e[SystemShop] Total items in auction house: {count}"
+items-on-sale: "&e[SystemShop] Number of items on sale: {count}"
+daily-deals-rotated: "&a[SystemShop] Daily deals have been rotated. {count} items are now on sale!"
+
+# GUI Titles
+title-categories: "&2System Shop - Categories"
+title-shop: "&2Shop - {category} - Page {page}"
+title-confirm-purchase: "&4Confirm Purchase"
+title-special-order: "&2System Shop - Special Order"
+title-consignment: "&2System Shop - Consignment"
+
+# GUI Items
+item-seller: "&7Seller: {seller}"
+item-price: "&7Price: {price}"
+item-price-discounted: "&aDiscounted Price ({percent}% off): {price}"
+item-expires: "&7Expires in: {time}"
+item-seller-system: "System (Shop)"
+item-seller-unknown: "Unknown"
+
+button-next-page: "&aNext Page"
+button-prev-page: "&cPrevious Page"
+button-back-categories: "&cBack to Categories"
+button-sort: "&eChange Sorting"
+button-sort-lore:
+  - "&7Current: &f{type} ({order})"
+  - "&aLeft-Click: &7Toggle Asc/Desc"
+  - "&aRight-Click: &7Cycle Type (Price/Name)"
+button-confirm-purchase: "&aConfirm Purchase"
+button-cancel: "&cCancel"
+consignment-listing-fee: "&eListing Fee: &6{fee}"
+
+# Event Messages
+event-end: "&aThe market has returned to normal."
+event-market-crash: "&cMarket Crash! All prices have been temporarily reduced."
+event-market-boom: "&aMarket Boom! All prices have been temporarily increased."
