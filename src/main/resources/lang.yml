@@ -24,6 +24,7 @@ special-order-placed: "&aYour special order for {item} has been placed."
 item-listed: "&aYou have listed the item for {price}."
 not-enough-money-for-fee: "&cYou don't have enough money to pay the listing fee."
 invalid-price: "&cInvalid price."
+error-opening-sign: "&cCould not open sign editor. Please report this to an administrator."
 
 # Sleep Messages
 sleep-success: "&eThe sun rises as enough players are sleeping."
@@ -45,11 +46,11 @@ title-special-order: "&2System Shop - Special Order"
 title-consignment: "&2System Shop - Consignment"
 
 # GUI Items
-item-seller: "&7Seller: {seller}"
-item-price: "&7Price: {price}"
-item-price-discounted: "&aDiscounted Price ({percent}% off): {price}"
-item-expires: "&7Expires in: {time}"
-item-seller-system: "System (Shop)"
+item-seller: "&dSeller: &5{seller}"
+item-price: "&ePrice: &6{price}"
+item-price-discounted: "&aDiscounted Price ({percent}% off): &2{price}"
+item-expires: "&7Expires in: &f{time}"
+item-seller-system: "&4System (Shop)"
 item-seller-unknown: "Unknown"
 
 button-next-page: "&aNext Page"

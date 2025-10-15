@@ -2,39 +2,54 @@ package com.holyw.wowah;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class SignInputManager implements Listener {
 
     private final Map<UUID, Consumer<String[]>> signSessions = new HashMap<>();
+    private final SystemShop plugin;
 
     public SignInputManager(SystemShop plugin) {
+        this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public void openSignGUI(Player player, Consumer<String[]> onComplete) {
         Location signLocation = player.getLocation().clone().add(0, 200, 0);
+        if (signLocation.getY() > 319) {
+            signLocation.setY(319);
+        }
         player.sendBlockChange(signLocation, Material.OAK_SIGN.createBlockData());
 
         signSessions.put(player.getUniqueId(), onComplete);
 
         try {
-            String version = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            Object packet = Class.forName("net.minecraft.server." + version + ".PacketPlayOutOpenSignEditor").getConstructor(Class.forName("net.minecraft.server." + version + ".BlockPosition")).newInstance(Class.forName("net.minecraft.server." + version + ".BlockPosition").getConstructor(int.class, int.class, int.class).newInstance(signLocation.getBlockX(), signLocation.getBlockY(), signLocation.getBlockZ()));
+            Class<?> blockPositionClass = Class.forName("net.minecraft.core.BlockPosition");
+            Constructor<?> blockPositionConstructor = blockPositionClass.getConstructor(int.class, int.class, int.class);
+            Object blockPosition = blockPositionConstructor.newInstance(signLocation.getBlockX(), signLocation.getBlockY(), signLocation.getBlockZ());
+
+            Class<?> packetPlayOutOpenSignEditorClass = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutOpenSignEditor");
+            Constructor<?> packetPlayOutOpenSignEditorConstructor = packetPlayOutOpenSignEditorClass.getConstructor(blockPositionClass, boolean.class);
+            Object packet = packetPlayOutOpenSignEditorConstructor.newInstance(blockPosition, true);
+
             Object craftPlayer = player.getClass().getMethod("getHandle").invoke(player);
             Object playerConnection = craftPlayer.getClass().getField("playerConnection").get(craftPlayer);
-            playerConnection.getClass().getMethod("sendPacket", Class.forName("net.minecraft.server." + version + ".Packet")).invoke(playerConnection, packet);
+            Class<?> packetClass = Class.forName("net.minecraft.network.protocol.Packet");
+            playerConnection.getClass().getMethod("sendPacket", packetClass).invoke(playerConnection, packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to open sign GUI for " + player.getName(), e);
+            player.sendMessage(Lang.get("error-opening-sign"));
+            signSessions.remove(player.getUniqueId());
         }
     }
 
