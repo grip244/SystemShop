@@ -12,7 +12,7 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 *   **Fully Automated & Intelligent:** The shop stocks itself with a balanced and exciting selection of items, with no admin intervention required.
 *   **Deeply Configurable:** From item spawn rates to enchantment levels, you have complete control over your server's economy.
 *   **Dynamic & Living Economy:** Prices ebb and flow based on supply and demand, and random server-wide events keep the market on its toes.
-*   **Player-Driven Market:** Empower your players to shape the economy with special orders and a consignment system for selling their own goods.
+*   **Player-Driven Market:** Empower your players to shape the economy with special orders. (NYI)
 
 ## Core Features
 
