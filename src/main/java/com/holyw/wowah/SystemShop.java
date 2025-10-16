@@ -1,5 +1,6 @@
 package com.holyw.wowah;
 
+import com.holyw.wowah.PlaceholderAPI;
 import com.earth2me.essentials.Essentials;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -42,6 +43,7 @@ public class SystemShop extends JavaPlugin {
             return;
         }
         setupEssentials();
+        setupPlaceholderAPI();
         this.saveDefaultConfig();
         Lang.load(this);
         loadMotdConfig();
@@ -104,6 +106,15 @@ public class SystemShop extends JavaPlugin {
             getLogger().info("Essentials found, using it for worth values.");
         } else {
             getLogger().info("Essentials not found, using pricing.yml for worth values.");
+        }
+    }
+
+    private void setupPlaceholderAPI() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderAPI(this).register();
+            getLogger().info("PlaceholderAPI found, placeholders registered.");
+        } else {
+            getLogger().info("PlaceholderAPI not found, placeholders will not work.");
         }
     }
 

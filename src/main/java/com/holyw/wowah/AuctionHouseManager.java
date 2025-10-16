@@ -79,6 +79,10 @@ public class AuctionHouseManager {
         return auctionItems;
     }
 
+    public int getTotalItems() {
+        return auctionItems.size();
+    }
+
     public void saveAuctionItems() {
         auctionsConfig.set("auctions", null);
         for (int i = 0; i < auctionItems.size(); i++) {

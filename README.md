@@ -92,4 +92,35 @@ We welcome contributions of all kinds! If you have a feature request, bug report
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## System Shop is more than just a shop; it's an economic revolution for your server. Download it today and build the marketplace your community deserves!
+## Placeholders
+
+If you have PlaceholderAPI installed, SystemShop exposes several placeholders under the `systemshop` identifier:
+
+- `%systemshop_total_items%` - Total number of items currently in the auction house.
+- `%systemshop_items_on_sale%` - Number of items currently marked as on sale (daily deals / discounted).
+- `%systemshop_price_<MATERIAL>%` - Returns the configured price for a given material name. Example: `%systemshop_price_DIAMOND%`.
+
+Notes and examples
+
+- Optional integration: PlaceholderAPI is optional. SystemShop will work normally without it. If PAPI is installed the plugin will register placeholders on startup and you will see a console message stating so.
+
+- Server-side usage: The placeholders above are server-side and will resolve even when no player context is provided (you can use them in configs like motd.yml or in other plugins that support server-side placeholders).
+
+- Material names must match Bukkit `Material` enum names (UPPERCASE, underscores). Examples: `DIAMOND`, `IRON_INGOT`, `ENCHANTED_BOOK`.
+
+Examples — in-game (player context):
+```
+/papi parse me %systemshop_total_items%
+/papi parse me %systemshop_items_on_sale%
+/papi parse me %systemshop_price_DIAMOND%
+```
+
+Examples — config / server-side (no player required):
+```
+Welcome! The auction house currently has %systemshop_total_items% items available.
+Today's deals: %systemshop_items_on_sale%
+Diamond price: %systemshop_price_DIAMOND%
+```
+
+If PlaceholderAPI isn't installed the placeholders won't resolve; that's expected and SystemShop will continue to function without PAPI.
+

@@ -4,7 +4,7 @@ main: com.holyw.wowah.SystemShop
 api-version: 1.21
 author: holyw
 depend: [Vault]
-softdepend: [Essentials]
+softdepend: [Essentials, PlaceholderAPI]
 
 commands: # Changed ah to shop
   shop:
