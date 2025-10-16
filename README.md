@@ -32,7 +32,6 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 ### Player-Driven Market
 
 *   **Special Orders:** Can't find what you're looking for? Players can place a "special order" for any item in the game, which the system will then try to stock for a premium.
-*   **Consignment System:** Give your players the power to sell their own items! Our intuitive consignment system allows players to list their items in the shop for a small fee, creating a true player-to-player marketplace.
 
 ### Intuitive Player Experience
 
