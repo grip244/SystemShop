@@ -1,4 +1,7 @@
 # SystemShop: The Ultimate Economy Engine for Your Server!
+
+[![Java CI with Maven](https://github.com/grip244/SystemShop/actions/workflows/maven.yml/badge.svg?branch=master)](https://github.com/grip244/SystemShop/actions/workflows/maven.yml)
+
 Tired of stagnant economies and empty auction houses? Want to create a vibrant, player-driven marketplace that thrives on any server, big or small? Look no further!
 
 System Shop is a complete reimagining of the server shop concept. It's not just a shop; it's a powerful, fully automated economic engine that brings your server to life. Whether you have a cozy community of 5 or a bustling metropolis of 500, System Shop creates a dynamic and engaging marketplace for everyone.
