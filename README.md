@@ -92,4 +92,4 @@ We welcome contributions of all kinds! If you have a feature request, bug report
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-System Shop is more than just a shop; it's an economic revolution for your server. Download it today and build the marketplace your community deserves!
+## System Shop is more than just a shop; it's an economic revolution for your server. Download it today and build the marketplace your community deserves!
