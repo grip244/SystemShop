@@ -32,13 +32,14 @@ Core Features:\
 -Sort & Filter: Players can sort items by price to quickly find the best deals.\
 -Simple Commands: The entire system is accessible through the simple and intuitive /shop command.\
 -Fun Server Utilities\
+-MoTD functionalities: Allows {uptime}, and multiline support! motd.yml\
 -One-Player-Sleep System: A configurable system to skip the night when enough players are sleeping.\
 -A Fun Wake-Up Call: A cheerful chicken sound to greet your players in the morning!
 
 Admin Commands & Permissions:\
 -/shop: Opens the shop GUI.\
--/shop sell: Opens the consignment GUI for players to sell their items.\
--/shop order: Opens the special order GUI for players to request items.\
+-/shop sell: Sells the item(s) held in the players hand.\
+-/shop order: Opens the special order GUI for players to request items. (To be further implemented)\
 -/shop refill: (Admin) Clears and refills the shop with a fresh set of items.\
 -/shop reload: (Admin) Reloads the plugin's configuration.\
 -wowah.admin: Grants access to admin commands.
