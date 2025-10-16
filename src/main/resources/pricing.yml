@@ -20,17 +20,17 @@ tier-assignments:
   - tier: LEGENDARY
     materials: [ 'elytra', 'beacon', 'conduit', 'nether_star', 'spawn_egg' ]
   - tier: EPIC
-    materials: [ 'netherite' ]
+    materials: [ 'netherite', 'totem', 'enchanted_golden_apple', 'trident' ]
   - tier: RARE
-    materials: [ 'diamond' ]
+    materials: [ 'diamond', 'emerald', 'obsidian', 'ominous_banner', 'wind_charge', 'mace' ]
   - tier: UNCOMMON
-    materials: [ 'gold', 'iron' ]
+    materials: [ 'gold', 'iron', 'lapis', 'redstone', 'quartz', 'book' ]
   - tier: COPPER
     materials: [ 'copper' ]
   - tier: COMMON
-    materials: [ 'stone' ]
+    materials: [ 'stone', 'coal', 'sand', 'gravel', 'dirt', 'log' ]
   - tier: TRASH # Default/fallback tier
-    materials: [ 'wood', 'leather', 'chainmail' ]
+    materials: [ 'wood', 'leather', 'chainmail', 'rotten_flesh', 'string', 'bone', 'gunpowder' ]
 
 # Multipliers for specific item types.
 # Affects the base price before randomness.
@@ -50,3 +50,5 @@ item-type-multipliers:
 special-overrides:
   TRIAL_KEY: "15000,25000"
   OMINOUS_BOTTLE: "25000,40000"
+  SADDLE: "1000,2000"
+  HEART_OF_THE_SEA: "5000,10000"

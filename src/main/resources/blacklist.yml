@@ -14,3 +14,4 @@ blacklist:
   - "LIGHT"
   - "BEDROCK"
   - "KNOWLEDGE_BOOK"
+  - "DEBUG_STICK"

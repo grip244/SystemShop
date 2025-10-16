@@ -1,5 +1,6 @@
 package com.holyw.wowah;
 
+import com.earth2me.essentials.Essentials;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import net.milkbowl.vault.economy.Economy;
@@ -7,9 +8,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,10 +28,11 @@ public class SystemShop extends JavaPlugin {
     private PricingManager pricingManager;
     private EventManager eventManager;
     private SpecialOrdersManager specialOrdersManager;
-    private ConsignmentManager consignmentManager;
-    private SignInputManager signInputManager;
     private DailyDealsManager dailyDealsManager;
     private List<String> itemBlacklist;
+    private Essentials essentials = null;
+    private FileConfiguration motdConfig = null;
+    private File motdFile = null;
 
     @Override
     public void onEnable() {
@@ -35,19 +41,20 @@ public class SystemShop extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        setupEssentials();
         this.saveDefaultConfig();
         Lang.load(this);
+        loadMotdConfig();
         setupBlacklist();
         auctionHouseManager = new AuctionHouseManager(this);
         auctionHouseGUI = new AuctionHouseGUI(this);
         pricingManager = new PricingManager(this);
         eventManager = new EventManager(this);
         specialOrdersManager = new SpecialOrdersManager(this);
-        consignmentManager = new ConsignmentManager(this);
-        signInputManager = new SignInputManager(this);
         dailyDealsManager = new DailyDealsManager(this);
         new AuctionHouseListener(this);
-        new SleepListener(this); // Register the new sleep listener
+        new SleepListener(this);
+        new MOTDListener(this);
         getLogger().info(Lang.get("plugin-enabled"));
 
         // bStats
@@ -72,14 +79,6 @@ public class SystemShop extends JavaPlugin {
         return specialOrdersManager;
     }
 
-    public ConsignmentManager getConsignmentManager() {
-        return consignmentManager;
-    }
-
-    public SignInputManager getSignInputManager() {
-        return signInputManager;
-    }
-
     @Override
     public void onDisable() {
         auctionHouseManager.clearSystemAuctions();
@@ -96,6 +95,28 @@ public class SystemShop extends JavaPlugin {
         }
         econ = rsp.getProvider();
         return econ != null;
+    }
+
+    private void setupEssentials() {
+        Plugin essentialsPlugin = getServer().getPluginManager().getPlugin("Essentials");
+        if (essentialsPlugin instanceof Essentials) {
+            essentials = (Essentials) essentialsPlugin;
+            getLogger().info("Essentials found, using it for worth values.");
+        } else {
+            getLogger().info("Essentials not found, using pricing.yml for worth values.");
+        }
+    }
+
+    public void loadMotdConfig() {
+        motdFile = new File(getDataFolder(), "motd.yml");
+        if (!motdFile.exists()) {
+            saveResource("motd.yml", false);
+        }
+        motdConfig = YamlConfiguration.loadConfiguration(motdFile);
+    }
+
+    public FileConfiguration getMotdConfig() {
+        return motdConfig;
     }
 
     private void setupBlacklist() {
@@ -126,6 +147,7 @@ public class SystemShop extends JavaPlugin {
                 if (sender.hasPermission("systemshop.admin")) {
                     this.reloadConfig();
                     Lang.load(this);
+                    loadMotdConfig();
                     pricingManager.load();
                     sender.sendMessage(Lang.get("config-reloaded"));
                 } else {
@@ -159,7 +181,42 @@ public class SystemShop extends JavaPlugin {
             if (args.length > 0 && args[0].equalsIgnoreCase("sell")) {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
-                    consignmentManager.openConsignmentGUI(player);
+                    ItemStack itemInHand = player.getInventory().getItemInMainHand();
+
+                    if (itemInHand == null || itemInHand.getType().isAir()) {
+                        player.sendMessage(Lang.get("sell-no-item"));
+                        return true;
+                    }
+
+                    double price = 0;
+                    if (essentials != null) {
+                        try {
+                            BigDecimal worth = essentials.getWorth().getPrice(essentials, itemInHand);
+                            if (worth != null) {
+                                price = worth.doubleValue();
+                            }
+                        } catch (Exception e) {
+                            getLogger().warning("Error getting worth from Essentials: " + e.getMessage());
+                        }
+                    }
+
+                    if (price <= 0) {
+                        price = pricingManager.getPrice(itemInHand.getType());
+                    }
+
+                    if (price <= 0) {
+                        player.sendMessage(Lang.get("sell-not-sellable"));
+                        return true;
+                    }
+
+                    double sellMultiplier = getConfig().getDouble("pricing.sell-price-multiplier", 0.75);
+                    int amount = itemInHand.getAmount();
+                    double totalPrice = price * amount * sellMultiplier;
+
+                    econ.depositPlayer(player, totalPrice);
+                    player.getInventory().setItemInMainHand(null);
+                    player.sendMessage(Lang.get("sell-success", "{amount}", String.valueOf(amount), "{item}", itemInHand.getType().toString(), "{price}", String.valueOf(totalPrice)));
+
                 } else {
                     sender.sendMessage(Lang.get("player-only"));
                 }

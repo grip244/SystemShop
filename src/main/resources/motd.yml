@@ -1,0 +1,7 @@
+# MOTD settings
+motd:
+  enabled: true
+  line1:
+    - "&aWelcome to &b default server name!"
+    - "&aSample Second Line for line1!"
+  line2: "&eServer Uptime: {uptime}"

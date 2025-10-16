@@ -101,6 +101,19 @@ public class AuctionPopulator {
             stackSize = random.nextInt(64) + 1; // 1-64
         }
 
+        if (category.equals(AuctionHouseGUI.Category.MISCELLANEOUS.getDisplayName())) {
+            int maxStack = material.getMaxStackSize();
+            if (maxStack > 1 && random.nextBoolean()) { // 50% chance to stack
+                // Stack between 2 and a cap of 16, or maxStack if it's smaller
+                int upper_bound = Math.min(maxStack, 16);
+                if (upper_bound > 2) {
+                    stackSize = random.nextInt(upper_bound - 2) + 2;
+                } else {
+                    stackSize = 2;
+                }
+            }
+        }
+
         // Create the ItemStack with the final stack size from the start.
         ItemStack itemStack = new ItemStack(material, stackSize);
 
@@ -138,6 +151,30 @@ public class AuctionPopulator {
         int tierOrdinal = Arrays.asList("TRASH", "COMMON", "COPPER", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC").indexOf(tierName);
 
         if ("MYTHIC".equals(tierName)) {
+            if (item.getType() == Material.ENCHANTED_BOOK) {
+                ItemMeta meta = item.getItemMeta();
+                meta.setDisplayName(ChatColor.GOLD + "Mythic Book");
+                List<String> lore = new ArrayList<>();
+                lore.add(ChatColor.LIGHT_PURPLE + "A book of immense power.");
+                meta.setLore(lore);
+                item.setItemMeta(meta);
+
+                Collections.shuffle(possibleEnchantments);
+                Set<Enchantment> appliedEnchantments = new HashSet<>();
+
+                int enchantmentsToAdd = 5; // Number of enchantments for a Mythic Book
+
+                for (int i = 0; i < enchantmentsToAdd && !possibleEnchantments.isEmpty(); i++) {
+                    Enchantment enchantment = possibleEnchantments.get(i);
+
+                    int level = enchantment.getMaxLevel(); // Max level for Mythic Books
+                    applyEnchantment(item, enchantment, level);
+                    appliedEnchantments.add(enchantment);
+                    totalValue += (tierBasePrice * 2.0) * level; // Higher value for Mythic Books
+                }
+
+                return totalValue;
+            }
             // --- Mythic Item Logic ---
             boolean allowUnsafe = plugin.getConfig().getBoolean("population.mythic-items.allow-unsafe-enchantments", true);
             double levelMultiplier = plugin.getConfig().getDouble("population.mythic-items.enchantment-level-multiplier", 1.5);
@@ -182,9 +219,14 @@ public class AuctionPopulator {
                 int numberOfEnchantments = random.nextInt(3) + 1; // 1-3 enchantments for books
                 for (int i = 0; i < numberOfEnchantments && !possibleEnchantments.isEmpty(); i++) {
                     Enchantment enchantment = possibleEnchantments.remove(random.nextInt(possibleEnchantments.size()));
-                    int minLevel = plugin.getConfig().getInt("population.enchanted-books.min-level", 1);
-                    int maxLevel = plugin.getConfig().getInt("population.enchanted-books.max-level", 5);
-                    int level = random.nextInt(maxLevel - minLevel + 1) + minLevel;
+                    int maxLevel = enchantment.getMaxLevel();
+                    if (maxLevel == 0) {
+                        i--; // try again with another enchantment
+                        continue;
+                    }
+                    int level = random.nextInt(maxLevel) + 1; // Level between 1 and maxLevel
+
+                    // Mythic books are handled in the MYTHIC tier
                     applyEnchantment(item, enchantment, level);
                     totalValue += (tierBasePrice * 0.5) * level;
                 }
@@ -219,7 +261,11 @@ public class AuctionPopulator {
     private void applyEnchantment(ItemStack item, Enchantment enchantment, int level) {
         if (item.getType() == Material.ENCHANTED_BOOK) {
             EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
-            meta.addStoredEnchant(enchantment, level, true);
+            if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.GOLD + "Mythic Book")) {
+                meta.addStoredEnchant(enchantment, level, true);
+            } else {
+                meta.addStoredEnchant(enchantment, level, false);
+            }
             item.setItemMeta(meta);
         } else {
             item.addUnsafeEnchantment(enchantment, level);

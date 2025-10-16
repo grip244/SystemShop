@@ -1,14 +1,15 @@
 name: SystemShop
-version: 1.0.1
+version: 1.0.3
 main: com.holyw.wowah.SystemShop
 api-version: 1.21
 author: holyw
 depend: [Vault]
+softdepend: [Essentials]
 
 commands: # Changed ah to shop
   shop:
     description: Opens the System Shop or performs admin commands.
-    usage: /shop [help/sell/refill/purge]
+    usage: /shop [sell/order/refill/purge/reload]
 
 permissions:
   systemshop.admin:

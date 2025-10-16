@@ -20,11 +20,10 @@ not-enough-money: "&cYou don't have enough money to buy this item!"
 purchase-cancelled: "&ePurchase cancelled."
 special-order-placed: "&aYour special order for {item} has been placed."
 
-# Consignment Messages
-item-listed: "&aYou have listed the item for {price}."
-not-enough-money-for-fee: "&cYou don't have enough money to pay the listing fee."
-invalid-price: "&cInvalid price."
-error-opening-sign: "&cCould not open sign editor. Please report this to an administrator."
+# Sell Messages
+sell-no-item: "&cYou must be holding an item to sell."
+sell-not-sellable: "&cThis item cannot be sold to the shop."
+sell-success: "&aYou sold {amount} {item} for {price}."
 
 # Sleep Messages
 sleep-success: "&eThe sun rises as enough players are sleeping."
@@ -43,7 +42,6 @@ title-categories: "&2System Shop - Categories"
 title-shop: "&2Shop - {category} - Page {page}"
 title-confirm-purchase: "&4Confirm Purchase"
 title-special-order: "&2System Shop - Special Order"
-title-consignment: "&2System Shop - Consignment"
 
 # GUI Items
 item-seller: "&dSeller: &5{seller}"
@@ -63,7 +61,6 @@ button-sort-lore:
   - "&aRight-Click: &7Cycle Type (Price/Name)"
 button-confirm-purchase: "&aConfirm Purchase"
 button-cancel: "&cCancel"
-consignment-listing-fee: "&eListing Fee: &6{fee}"
 
 # Event Messages
 event-end: "&aThe market has returned to normal."

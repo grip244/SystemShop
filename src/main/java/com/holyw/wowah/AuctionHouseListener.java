@@ -149,32 +149,6 @@ public class AuctionHouseListener implements Listener {
             plugin.getSpecialOrdersManager().addSpecialOrder(material);
             player.closeInventory();
             player.sendMessage(Lang.get("special-order-placed", "{item}", material.name()));
-        } else if (title.equals(Lang.get("title-consignment"))) {
-            event.setCancelled(true);
-            ItemStack clickedItem = event.getCurrentItem();
-            if (clickedItem == null || clickedItem.getType().isAir()) {
-                return;
-            }
-
-            player.closeInventory();
-            plugin.getSignInputManager().openSignGUI(player, lines -> {
-                try {
-                    double price = Double.parseDouble(lines[0]);
-                    double listingFee = plugin.getConfig().getDouble("consignment.listing-fee", 100.0);
-                    Economy econ = SystemShop.getEconomy();
-
-                    if (econ.has(player, listingFee)) {
-                        econ.withdrawPlayer(player, listingFee);
-                        plugin.getAuctionHouseManager().addAuctionItem(clickedItem, player.getUniqueId(), player.getUniqueId(), price, 86400000, AuctionPopulator.getCategory(clickedItem.getType()));
-                        player.getInventory().removeItem(clickedItem);
-                        player.sendMessage(Lang.get("item-listed", "{price}", String.valueOf(price)));
-                    } else {
-                        player.sendMessage(Lang.get("not-enough-money-for-fee"));
-                    }
-                } catch (NumberFormatException e) {
-                    player.sendMessage(Lang.get("invalid-price"));
-                }
-            });
         }
     }
 

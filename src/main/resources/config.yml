@@ -56,6 +56,9 @@ daily-deals:
 
 # Pricing settings
 pricing:
+  # The multiplier for the price when selling items to the shop.
+  # For example, 0.75 means players get 75% of the item's value.
+  sell-price-multiplier: 0.75
   # Use EssentialsX's worth.yml for item pricing.
   # If enabled, the plugin will try to use EssentialsX's worth.yml file for item prices.
   # The path to the worth.yml file can be configured below.
@@ -80,10 +83,3 @@ events:
   market-crash-multiplier: 0.8
   # The price multiplier to apply during a market boom event.
   market-boom-multiplier: 1.2
-
-# Consignment settings
-consignment:
-  # The fee to list an item on the auction house.
-  listing-fee: 100.0
-  # The commission percentage the auction house takes from each sale.
-  commission-percentage: 5.0
