@@ -1,3 +1,4 @@
+
 # SystemShop: The Ultimate Economy Engine for Your Server!
 
 [![Java CI with Maven](https://github.com/grip244/SystemShop/actions/workflows/maven.yml/badge.svg?branch=master)](https://github.com/grip244/SystemShop/actions/workflows/maven.yml)
@@ -6,13 +7,28 @@ Tired of stagnant economies and empty auction houses? Want to create a vibrant, 
 
 System Shop is a complete reimagining of the server shop concept. It's not just a shop; it's a powerful, fully automated economic engine that brings your server to life. Whether you have a cozy community of 5 or a bustling metropolis of 500, System Shop creates a dynamic and engaging marketplace for everyone.
 
+## Table of Contents
+
+*   [Why Choose System Shop?](#why-choose-system-shop)
+*   [Core Features](#core-features)
+    *   [Intelligent Item Population](#intelligent-item-population)
+    *   [Dynamic & Living Economy](#dynamic--living-economy)
+    *   [Player-Driven Market](#player-driven-market)
+    *   [Intuitive Player Experience](#intuitive-player-experience)
+    *   [Fun Server Utilities](#fun-server-utilities)
+*   [Admin Commands & Permissions](#admin-commands--permissions)
+*   [Dependencies](#dependencies)
+*   [Getting Started](#getting-started)
+*   [Contributing](#contributing)
+*   [License](#license)
+
 ## Why Choose System Shop?
 
 *   **Solve the "Empty Server" Problem:** Provides a constant, reliable source of items, making your server feel active and resourceful from day one.
 *   **Fully Automated & Intelligent:** The shop stocks itself with a balanced and exciting selection of items, with no admin intervention required.
 *   **Deeply Configurable:** From item spawn rates to enchantment levels, you have complete control over your server's economy.
 *   **Dynamic & Living Economy:** Prices ebb and flow based on supply and demand, and random server-wide events keep the market on its toes.
-*   **Player-Driven Market:** Empower your players to shape the economy with special orders. (NYI)
+*   **Player-Driven Market:** Empower your players to shape the economy with special orders and a consignment system for selling their own goods.
 
 ## Core Features
 
@@ -32,6 +48,7 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 ### Player-Driven Market
 
 *   **Special Orders:** Can't find what you're looking for? Players can place a "special order" for any item in the game, which the system will then try to stock for a premium.
+*   **Consignment System:** Give your players the power to sell their own items! Our intuitive consignment system allows players to list their items in the shop for a small fee, creating a true player-to-player marketplace.
 
 ### Intuitive Player Experience
 
@@ -69,7 +86,7 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 
 ## Contributing
 
-We welcome contributions of all kinds! If you have a feature request, bug report, or want to contribute to the code, please open an issue or pull request on our [GitHub repository](https'github.com/grip244/SystemShop).
+We welcome contributions of all kinds! If you have a feature request, bug report, or want to contribute to the code, please open an issue or pull request on our [GitHub repository](https://github.com/grip244/SystemShop).
 
 ## License
 
