@@ -72,26 +72,6 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 | `/shop refill` | (Admin) Clears and refills the shop with a fresh set of items. | `systemshop.admin` |
 | `/shop reload` | (Admin) Reloads the plugin's configuration. | `systemshop.admin` |
 
-## Dependencies
-
-*   **Vault:** Required for all economy functions.
-
-## Getting Started
-
-1.  Download the latest version of SystemShop from the [releases page](https://github.com/grip244/SystemShop/releases).
-2.  Install Vault and an economy plugin of your choice (like EssentialsX).
-3.  Place the `SystemShop.jar` file in your server's `plugins` folder.
-4.  Restart your server.
-5.  Configure the plugin to your liking by editing the files in the `plugins/SystemShop` folder.
-
-## Contributing
-
-We welcome contributions of all kinds! If you have a feature request, bug report, or want to contribute to the code, please open an issue or pull request on our [GitHub repository](https://github.com/grip244/SystemShop).
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Placeholders
 
 If you have PlaceholderAPI installed, SystemShop exposes several placeholders under the `systemshop` identifier:
@@ -123,4 +103,24 @@ Diamond price: %systemshop_price_DIAMOND%
 ```
 
 If PlaceholderAPI isn't installed the placeholders won't resolve; that's expected and SystemShop will continue to function without PAPI.
+
+## Dependencies
+*   **PlaholderAPI(optional)** Completely optional for now.
+*   **Vault:** Required for all economy functions.
+
+## Getting Started
+
+1.  Download the latest version of SystemShop from the [releases page](https://github.com/grip244/SystemShop/releases).
+2.  Install Vault and an economy plugin of your choice (like EssentialsX).
+3.  Place the `SystemShop.jar` file in your server's `plugins` folder.
+4.  Restart your server.
+5.  Configure the plugin to your liking by editing the files in the `plugins/SystemShop` folder.
+
+## Contributing
+
+We welcome contributions of all kinds! If you have a feature request, bug report, or want to contribute to the code, please open an issue or pull request on our [GitHub repository](https://github.com/grip244/SystemShop).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
