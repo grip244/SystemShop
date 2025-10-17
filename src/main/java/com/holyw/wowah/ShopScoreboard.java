@@ -1,22 +1,20 @@
 package com.holyw.wowah;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ShopScoreboard implements Listener {
 
@@ -156,15 +154,15 @@ public class ShopScoreboard implements Listener {
 
     private String parsePlaceholders(Player player, String text) {
         String converted = ChatColor.translateAlternateColorCodes('&', text);
-        // First apply our own replacements so placeholders are present for PAPI too
-        converted = converted.replace("%systemshop_total_items%", String.valueOf(plugin.getAuctionHouseManager().getTotalItems()));
-        long discounted = plugin.getAuctionHouseManager().getAuctionItems().stream().filter(com.holyw.wowah.AuctionHouseManager.AuctionItem::isOnSale).count();
-        converted = converted.replace("%systemshop_items_on_sale%", String.valueOf(discounted));
-        try {
-            double price = plugin.getPricingManager().getPrice(org.bukkit.Material.DIAMOND);
-            converted = converted.replace("%systemshop_price_DIAMOND%", String.valueOf(price));
-        } catch (Exception ex) {
-            converted = converted.replace("%systemshop_price_DIAMOND%", "");
+
+        // Manual replacements
+        if (converted.contains("%systemshop_price_DIAMOND%")) {
+            try {
+                double price = plugin.getPricingManager().getPrice(new ItemStack(Material.DIAMOND));
+                converted = converted.replace("%systemshop_price_DIAMOND%", String.valueOf(price));
+            } catch (Exception ex) {
+                converted = converted.replace("%systemshop_price_DIAMOND%", "");
+            }
         }
 
         Plugin papi = plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI");
@@ -177,83 +175,6 @@ public class ShopScoreboard implements Listener {
             }
         }
 
-        // Re-apply our market-specific replacements in case PAPI modified or removed them
-        // Market multiplier placeholder
-        try {
-            EventManager.MarketEventType ev = plugin.getEventManager().getCurrentEvent();
-            double multiplier = 1.0;
-            if (ev == EventManager.MarketEventType.MARKET_CRASH) multiplier = plugin.getConfig().getDouble("events.market-crash-multiplier", 0.8);
-            if (ev == EventManager.MarketEventType.MARKET_BOOM) multiplier = plugin.getConfig().getDouble("events.market-boom-multiplier", 1.2);
-            // Determine trend arrow from recent multipliers
-            String trend = "";
-            try {
-                double[] recent = plugin.getEventManager().getRecentMultipliers();
-                if (recent != null && recent.length >= 2) {
-                    double prev = recent[recent.length - 2];
-                    double last = recent[recent.length - 1];
-                    if (last > prev) trend = "§a↑"; // green up
-                    else if (last < prev) trend = "§c↓"; // red down
-                    else trend = "§e→"; // yellow flat
-                }
-            } catch (Throwable t) {
-                trend = "";
-            }
-            String colored;
-            if (multiplier > 1.0) colored = "§a" + String.format("%.2fx", multiplier);
-            else if (multiplier < 1.0) colored = "§c" + String.format("%.2fx", multiplier);
-            else colored = "§f1.00x";
-            converted = converted.replace("%systemshop_market_multiplier%", colored + (trend.isEmpty() ? "" : " " + trend));
-        } catch (Throwable ignore) {
-            converted = converted.replace("%systemshop_market_multiplier%", "§f1.00x");
-        }
-
-        // Market sparkline chart placeholder (compact unicode bars)
-        if (converted.contains("%systemshop_market_chart%")) {
-            try {
-                double[] history = plugin.getEventManager().getRecentMultipliers();
-                String chart = buildSparkline(history, 10); // 10-char sparkline
-                converted = converted.replace("%systemshop_market_chart%", chart);
-            } catch (Throwable t) {
-                converted = converted.replace("%systemshop_market_chart%", "[market]");
-            }
-        }
-
         return converted;
-    }
-
-    // Build a compact sparkline of the recent multipliers using unicode block characters
-    private String buildSparkline(double[] values, int width) {
-        if (values == null || values.length == 0) return "";
-        int n = values.length;
-        // compress into width buckets (simple averaging)
-        double[] buckets = new double[width];
-        for (int i = 0; i < width; i++) {
-            int start = (int) Math.floor((double) i * n / width);
-            int end = (int) Math.floor((double) (i + 1) * n / width);
-            if (end <= start) end = Math.min(start + 1, n);
-            double sum = 0;
-            for (int j = start; j < end; j++) sum += values[j];
-            buckets[i] = sum / (end - start);
-        }
-        double min = Double.MAX_VALUE, max = Double.MIN_VALUE;
-        for (double v : buckets) {
-            if (v < min) min = v;
-            if (v > max) max = v;
-        }
-        if (min == max) {
-            // flat line
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < width; i++) sb.append('▁');
-            return sb.toString();
-        }
-        // Unicode blocks for sparkline (low to high)
-        char[] blocks = new char[]{'▁','▂','▃','▄','▅','▆','▇','█'};
-        StringBuilder sb = new StringBuilder();
-        for (double v : buckets) {
-            int idx = (int) Math.floor((v - min) / (max - min) * (blocks.length - 1));
-            idx = Math.max(0, Math.min(blocks.length - 1, idx));
-            sb.append(blocks[idx]);
-        }
-        return sb.toString();
     }
 }

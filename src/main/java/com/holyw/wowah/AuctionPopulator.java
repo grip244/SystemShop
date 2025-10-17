@@ -41,7 +41,7 @@ public class AuctionPopulator {
         for (int i = 0; i < specialOrdersToFulfill; i++) {
             Material material = plugin.getSpecialOrdersManager().getAndRemoveNextSpecialOrder();
             if (material != null) {
-                AuctionHouseManager.AuctionItem auctionItem = createAuctionItem(material);
+                AuctionHouseManager.AuctionItem auctionItem = createAuctionItem(new ItemStack(material));
                 double newPrice = auctionItem.getPrice() * priceMultiplier;
                 long duration = auctionItem.getExpiryTime() - System.currentTimeMillis();
                 plugin.getAuctionHouseManager().addAuctionItem(auctionItem.getItemStack(), auctionItem.getSeller(), newPrice, duration, auctionItem.getCategory());
@@ -73,7 +73,7 @@ public class AuctionPopulator {
 
             for (int i = 0; i < itemsForCategory; i++) {
                 Material material = materialsInCategory.get(random.nextInt(materialsInCategory.size()));
-                allNewItems.add(createAuctionItem(material));
+                allNewItems.add(createAuctionItem(new ItemStack(material)));
             }
         }
 
@@ -83,7 +83,8 @@ public class AuctionPopulator {
         // populate finished
     }
 
-    private AuctionHouseManager.AuctionItem createAuctionItem(Material material) {
+    private AuctionHouseManager.AuctionItem createAuctionItem(ItemStack itemStack) {
+        Material material = itemStack.getType();
         String category = getCategory(material);
         double enchantmentValue = 0;
         int stackSize = 1;
@@ -116,7 +117,7 @@ public class AuctionPopulator {
         }
 
         // Create the ItemStack with the final stack size from the start.
-        ItemStack itemStack = new ItemStack(material, stackSize);
+        itemStack.setAmount(stackSize);
 
         String tierName = plugin.getPricingManager().getTierName(material);
         if (category.equals(AuctionHouseGUI.Category.WEAPONS.getDisplayName()) || category.equals(AuctionHouseGUI.Category.TOOLS.getDisplayName()) || category.equals(AuctionHouseGUI.Category.ARMOR.getDisplayName()) || material == Material.ENCHANTED_BOOK) {
@@ -126,7 +127,7 @@ public class AuctionPopulator {
         if (category.equals(AuctionHouseGUI.Category.POTIONS.getDisplayName())) {
             addRandomPotionEffect(itemStack);
         }
-        double price = (plugin.getPricingManager().getPrice(material) + enchantmentValue) * stackSize;
+        double price = (plugin.getPricingManager().getPrice(itemStack) + enchantmentValue) * stackSize;
         price = Math.round(price * 100.0) / 100.0;
  
         long duration = 86400000; // 24 hours

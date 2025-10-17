@@ -1,18 +1,20 @@
 package com.holyw.wowah;
 
+import com.earth2me.essentials.Essentials;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 
 public class PricingManager {
 
     private final SystemShop plugin;
     private FileConfiguration pricingConfig;
-    private final Map<String, Double> essentialsWorth = new HashMap<>();
     private final Map<Material, Integer> stockLevels = new HashMap<>();
 
     private final Map<String, Double> materialTiers = new HashMap<>();
@@ -39,25 +41,6 @@ public class PricingManager {
         tierAssignments.clear();
         itemTypeMultipliers.clear();
         specialOverrides.clear();
-        essentialsWorth.clear();
-
-        // Load EssentialsX worth data
-        FileConfiguration config = plugin.getConfig();
-        if (config.getBoolean("pricing.use-essentials-worth", true)) {
-            String essentialsWorthPath = config.getString("pricing.essentials-worth-path", "plugins/Essentials/worth.yml");
-            File essentialsWorthFile = new File(essentialsWorthPath);
-            if (essentialsWorthFile.exists()) {
-                FileConfiguration essentialsWorthConfig = YamlConfiguration.loadConfiguration(essentialsWorthFile);
-                if (essentialsWorthConfig.getConfigurationSection("worth") != null) {
-                    for (String key : essentialsWorthConfig.getConfigurationSection("worth").getKeys(false)) {
-                        essentialsWorth.put(key.toUpperCase(), essentialsWorthConfig.getDouble("worth." + key));
-                    }
-                    plugin.getLogger().info("Successfully loaded EssentialsX worth data.");
-                }
-            } else {
-                plugin.getLogger().warning("EssentialsX worth.yml file not found at: " + essentialsWorthPath);
-            }
-        }
 
         // Load material tiers
         ConfigurationSection tiersSection = pricingConfig.getConfigurationSection("material-tiers");
@@ -106,21 +89,36 @@ public class PricingManager {
         }
     }
 
-    public double getPrice(Material material) {
-        double basePrice;
-        // Check EssentialsX worth data first
-        if (essentialsWorth.containsKey(material.name())) {
-            basePrice = essentialsWorth.get(material.name());
-        } else if (specialOverrides.containsKey(material)) {
-            Map.Entry<Integer, Integer> range = specialOverrides.get(material);
-            int min = range.getKey();
-            int max = range.getValue();
-            basePrice = min + random.nextInt(max - min);
-        } else {
-            String tierName = getTierName(material);
-            double tierPrice = materialTiers.getOrDefault(tierName, 10.0);
-            double multiplier = getItemTypeMultiplier(material);
-            basePrice = tierPrice * multiplier;
+    public double getPrice(ItemStack itemStack) {
+        double basePrice = 0;
+        Essentials essentials = plugin.getEssentials();
+
+        // Try Essentials API first
+        if (essentials != null) {
+            try {
+                BigDecimal worth = essentials.getWorth().getPrice(essentials, itemStack);
+                if (worth != null) {
+                    basePrice = worth.doubleValue();
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+
+        // Fallback to pricing.yml
+        if (basePrice <= 0) {
+            Material material = itemStack.getType();
+            if (specialOverrides.containsKey(material)) {
+                Map.Entry<Integer, Integer> range = specialOverrides.get(material);
+                int min = range.getKey();
+                int max = range.getValue();
+                basePrice = min + random.nextInt(max - min);
+            } else {
+                String tierName = getTierName(material);
+                double tierPrice = materialTiers.getOrDefault(tierName, 0.0);
+                double multiplier = getItemTypeMultiplier(material);
+                basePrice = tierPrice * multiplier;
+            }
         }
 
         // Apply dynamic pricing
@@ -128,7 +126,7 @@ public class PricingManager {
         if (config.getBoolean("pricing.dynamic-pricing.enabled", true)) {
             int maxStock = config.getInt("pricing.dynamic-pricing.max-stock", 100);
             double priceVolatility = config.getDouble("pricing.dynamic-pricing.price-volatility", 0.5);
-            int currentStock = stockLevels.getOrDefault(material, 0);
+            int currentStock = stockLevels.getOrDefault(itemStack.getType(), 0);
 
             if (currentStock > 0) {
                 double stockRatio = (double) (maxStock - currentStock) / maxStock;
@@ -143,9 +141,6 @@ public class PricingManager {
         } else if (currentEvent == EventManager.MarketEventType.MARKET_BOOM) {
             basePrice *= config.getDouble("events.market-boom-multiplier", 1.2);
         }
-
-        // Add some randomness
-        basePrice += random.nextDouble() * basePrice * 0.2; // Add up to 20% random variation
 
         return Math.round(basePrice * 100.0) / 100.0;
     }
@@ -163,7 +158,7 @@ public class PricingManager {
     }
 
     public double getBasePriceForTier(String tierName) {
-        return materialTiers.getOrDefault(tierName.toUpperCase(), 10.0);
+        return materialTiers.getOrDefault(tierName.toUpperCase(), 0.0);
     }
 
     private double getItemTypeMultiplier(Material material) {

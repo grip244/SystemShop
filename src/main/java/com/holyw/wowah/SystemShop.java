@@ -13,7 +13,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
-import java.math.BigDecimal;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,7 @@ public class SystemShop extends JavaPlugin {
     private SpecialOrdersManager specialOrdersManager;
     private DailyDealsManager dailyDealsManager;
     private ShopScoreboard shopScoreboard;
+    private BuybackManager buybackManager;
     private List<String> itemBlacklist;
     private Essentials essentials = null;
     private FileConfiguration motdConfig = null;
@@ -53,6 +54,7 @@ public class SystemShop extends JavaPlugin {
         eventManager = new EventManager(this);
         specialOrdersManager = new SpecialOrdersManager(this);
         dailyDealsManager = new DailyDealsManager(this);
+        buybackManager = new BuybackManager(this);
         // Decide initial population behavior.
         // If daily-deals are configured to refill the shop on rotate, run the rotation once on startup
         // so that the populator is executed inside rotateDeals (ensures deals are applied immediately).
@@ -139,6 +141,10 @@ public class SystemShop extends JavaPlugin {
         }
         econ = rsp.getProvider();
         return econ != null;
+    }
+
+    public Essentials getEssentials() {
+        return essentials;
     }
 
     private void setupEssentials() {
@@ -281,32 +287,18 @@ public class SystemShop extends JavaPlugin {
                         return true;
                     }
 
-                    double price = 0;
-                    if (essentials != null) {
-                        try {
-                            BigDecimal worth = essentials.getWorth().getPrice(essentials, itemInHand);
-                            if (worth != null) {
-                                price = worth.doubleValue();
-                            }
-                        } catch (Exception e) {
-                            getLogger().warning("Error getting worth from Essentials: " + e.getMessage());
-                        }
-                    }
-
-                    if (price <= 0) {
-                        price = pricingManager.getPrice(itemInHand.getType());
-                    }
+                    double price = buybackManager.getBuybackPrice(itemInHand);
 
                     if (price <= 0) {
                         player.sendMessage(Lang.get("sell-not-sellable"));
                         return true;
                     }
 
-                    double sellMultiplier = getConfig().getDouble("pricing.sell-price-multiplier", 0.75);
                     int amount = itemInHand.getAmount();
-                    double totalPrice = price * amount * sellMultiplier;
+                    double totalPrice = price * amount;
 
                     econ.depositPlayer(player, totalPrice);
+                    buybackManager.recordSale(itemInHand.getType(), amount);
                     player.getInventory().setItemInMainHand(null);
                     player.sendMessage(Lang.get("sell-success", "{amount}", String.valueOf(amount), "{item}", itemInHand.getType().toString(), "{price}", String.valueOf(totalPrice)));
 
@@ -369,6 +361,10 @@ public class SystemShop extends JavaPlugin {
 
     public PricingManager getPricingManager() {
         return pricingManager;
+    }
+
+    public BuybackManager getBuybackManager() {
+        return buybackManager;
     }
 
     public List<String> getItemBlacklist() {

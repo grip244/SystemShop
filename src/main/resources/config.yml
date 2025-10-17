@@ -92,7 +92,17 @@ scoreboard:
     - "&7Total items: &f%systemshop_total_items%"
     - "&7On sale: &f%systemshop_items_on_sale%"
     - "&7Diamond: &f%systemshop_price_DIAMOND%"
-    - "&7Market: &f%systemshop_market_multiplier%"
-    - "&7Mkt: &f%systemshop_market_chart%"
+    - "&7Market: &f%systemshop_market_status%"
   # Permission to opt-out per player; players with this permission will NOT see the scoreboard
   opt-out-permission: "systemshop.scoreboard.optout"
+
+# Buyback settings for /shop sell
+buyback:
+  enabled: true
+  # The minimum and maximum random multiplier for the daily buyback price.
+  min-multiplier: 0.8
+  max-multiplier: 1.2
+  # How much the price decreases with each item sold.
+  decrease-factor: 0.01
+  # The minimum price an item can have.
+  min-price: 1.0

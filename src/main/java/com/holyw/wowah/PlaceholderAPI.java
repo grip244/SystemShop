@@ -1,7 +1,10 @@
 package com.holyw.wowah;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class PlaceholderAPI extends PlaceholderExpansion {
 
@@ -43,11 +46,28 @@ public class PlaceholderAPI extends PlaceholderExpansion {
             return String.valueOf(discounted);
         }
 
+        if (identifier.equals("market_status")) {
+            EventManager.MarketEventType ev = plugin.getEventManager().getCurrentEvent();
+            String status;
+            switch (ev) {
+                case MARKET_BOOM:
+                    status = "&aBoom";
+                    break;
+                case MARKET_CRASH:
+                    status = "&cCrash";
+                    break;
+                default:
+                    status = "&eNormal";
+                    break;
+            }
+            return ChatColor.translateAlternateColorCodes('&', status);
+        }
+
         if (identifier.startsWith("price_")) {
             String mat = identifier.substring("price_".length()).toUpperCase();
             try {
-                org.bukkit.Material material = org.bukkit.Material.valueOf(mat);
-                double price = plugin.getPricingManager().getPrice(material);
+                Material material = Material.valueOf(mat);
+                double price = plugin.getPricingManager().getPrice(new ItemStack(material));
                 return String.valueOf(price);
             } catch (IllegalArgumentException e) {
                 return "";
