@@ -1,6 +1,5 @@
 package com.holyw.wowah;
 
-import com.holyw.wowah.PlaceholderAPI;
 import com.earth2me.essentials.Essentials;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,7 +13,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,6 +28,7 @@ public class SystemShop extends JavaPlugin {
     private EventManager eventManager;
     private SpecialOrdersManager specialOrdersManager;
     private DailyDealsManager dailyDealsManager;
+    private ShopScoreboard shopScoreboard;
     private List<String> itemBlacklist;
     private Essentials essentials = null;
     private FileConfiguration motdConfig = null;
@@ -54,6 +53,38 @@ public class SystemShop extends JavaPlugin {
         eventManager = new EventManager(this);
         specialOrdersManager = new SpecialOrdersManager(this);
         dailyDealsManager = new DailyDealsManager(this);
+        // Decide initial population behavior.
+        // If daily-deals are configured to refill the shop on rotate, run the rotation once on startup
+        // so that the populator is executed inside rotateDeals (ensures deals are applied immediately).
+        boolean dailyDealsEnabled = this.getConfig().getBoolean("daily-deals.enabled", true);
+        boolean refillOnRotate = this.getConfig().getBoolean("daily-deals.refill-shop-on-rotate", true);
+        int initialItems = this.getConfig().getInt("population.initial-items", 1500);
+        if (dailyDealsEnabled && refillOnRotate) {
+            // Run rotateDeals one tick later to let other plugins finish enabling.
+            getServer().getScheduler().runTaskLater(this, () -> {
+                try {
+                    dailyDealsManager.rotateDeals();
+                } catch (Throwable t) {
+                    getLogger().severe("Failed to run initial daily deals rotation: " + t.getMessage());
+                    t.printStackTrace();
+                }
+            }, 1L);
+        } else {
+            // Default legacy behavior: populate initial items if none exist.
+            if (initialItems > 0 && auctionHouseManager.getTotalItems() == 0) {
+                getServer().getScheduler().runTaskLater(this, () -> {
+                    try {
+                        getLogger().info(Lang.get("population-start", "{items}", String.valueOf(initialItems)));
+                        new AuctionPopulator(this).populate(initialItems);
+                    } catch (Throwable t) {
+                        getLogger().severe("Failed to populate initial system shop items: " + t.getMessage());
+                        t.printStackTrace();
+                    }
+                }, 1L);
+            }
+        }
+        shopScoreboard = new ShopScoreboard(this);
+        shopScoreboard.enable();
         new AuctionHouseListener(this);
         new SleepListener(this);
         new MOTDListener(this);
@@ -61,16 +92,24 @@ public class SystemShop extends JavaPlugin {
 
         // bStats
         int pluginId = 27557;
-        Metrics metrics = new Metrics(this, pluginId);
+        new Metrics(this, pluginId);
         getLogger().info("bStats metrics enabled.");
 
         // Schedule daily deals rotation
+        long ticksPerSecond = 20L;
+        long ticksPerMinute = ticksPerSecond * 60L;
+        long ticksPerHour = ticksPerMinute * 60L;
+        long periodTicks = ticksPerHour * 24L; // 24 hours
+        // If we already ran rotateDeals on startup (dailyDeals enabled and refill-on-rotate true),
+        // schedule the first periodic run after the full period so we don't duplicate shortly after startup.
+        long initialDelayTicks = (dailyDealsEnabled && refillOnRotate) ? periodTicks : ticksPerMinute; // else 1 minute
+
         new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
                 dailyDealsManager.rotateDeals();
             }
-        }.runTaskTimer(this, 20L * 60, 20L * 60 * 60 * 24); // 1 minute delay, then every 24 hours
+        }.runTaskTimer(this, initialDelayTicks, periodTicks);
     }
 
     public EventManager getEventManager() {
@@ -84,6 +123,9 @@ public class SystemShop extends JavaPlugin {
     @Override
     public void onDisable() {
         auctionHouseManager.clearSystemAuctions();
+        if (shopScoreboard != null) {
+            shopScoreboard.disable();
+        }
         getLogger().info(Lang.get("plugin-disabled"));
     }
 
@@ -187,6 +229,46 @@ public class SystemShop extends JavaPlugin {
                     sender.sendMessage(Lang.get("player-only"));
                 }
                 return true;
+            }
+
+                if (args.length > 0 && args[0].equalsIgnoreCase("scoreboard")) {
+                if (args.length == 1) {
+                    if (sender instanceof Player) {
+                        Player player = (Player) sender;
+                        if (shopScoreboard != null) {
+                            if (shopScoreboard.isHidden(player)) {
+                                shopScoreboard.showForPlayer(player);
+                                player.sendMessage(Lang.get("scoreboard-shown"));
+                            } else {
+                                shopScoreboard.hideForPlayer(player);
+                                player.sendMessage(Lang.get("scoreboard-hidden"));
+                            }
+                        } else {
+                            player.sendMessage(Lang.get("scoreboard-disabled"));
+                        }
+                    } else {
+                        sender.sendMessage(Lang.get("player-only"));
+                    }
+                    return true;
+                }
+
+                if (args.length == 2 && args[1].equalsIgnoreCase("toggle")) {
+                    if (!sender.hasPermission("systemshop.admin")) {
+                        sender.sendMessage(Lang.get("no-permission"));
+                        return true;
+                    }
+                    boolean enabled = !this.getConfig().getBoolean("scoreboard.enabled", true);
+                    this.getConfig().set("scoreboard.enabled", enabled);
+                    this.saveConfig();
+                    if (enabled) {
+                        if (shopScoreboard != null) shopScoreboard.enable();
+                        sender.sendMessage(Lang.get("scoreboard-enabled"));
+                    } else {
+                        if (shopScoreboard != null) shopScoreboard.disable();
+                        sender.sendMessage(Lang.get("scoreboard-disabled"));
+                    }
+                    return true;
+                }
             }
 
             if (args.length > 0 && args[0].equalsIgnoreCase("sell")) {

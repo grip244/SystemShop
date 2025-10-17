@@ -21,6 +21,11 @@ public class MOTDListener implements Listener {
 
     @EventHandler
     public void onServerListPing(ServerListPingEvent event) {
+        if (plugin.getMotdConfig() == null) {
+            plugin.getLogger().warning("MOTD config not loaded; skipping MOTD.");
+            return;
+        }
+
         if (!plugin.getMotdConfig().getBoolean("motd.enabled", false)) {
             return;
         }
@@ -28,17 +33,21 @@ public class MOTDListener implements Listener {
         List<String> line1Options = plugin.getMotdConfig().getStringList("motd.line1");
         String line1 = "";
         if (line1Options != null && !line1Options.isEmpty()) {
-            line1 = line1Options.get(random.nextInt(line1Options.size()));
+            try {
+                line1 = line1Options.get(random.nextInt(line1Options.size()));
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error picking MOTD line1: " + e.getMessage());
+            }
         }
 
         String line2 = plugin.getMotdConfig().getString("motd.line2", "");
 
-        if (line2.contains("{uptime}")) {
+        if (line2 != null && line2.contains("{uptime}")) {
             long uptimeMillis = ManagementFactory.getRuntimeMXBean().getUptime();
             line2 = line2.replace("{uptime}", formatUptime(uptimeMillis));
         }
 
-        event.setMotd(ChatColor.translateAlternateColorCodes('&', line1) + "\n" + ChatColor.translateAlternateColorCodes('&', line2));
+        event.setMotd(ChatColor.translateAlternateColorCodes('&', line1 == null ? "" : line1) + "\n" + ChatColor.translateAlternateColorCodes('&', line2 == null ? "" : line2));
     }
 
     private String formatUptime(long millis) {

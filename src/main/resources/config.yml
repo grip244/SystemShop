@@ -83,3 +83,16 @@ events:
   market-crash-multiplier: 0.8
   # The price multiplier to apply during a market boom event.
   market-boom-multiplier: 1.2
+
+# Scoreboard settings for the SystemShop sidebar
+scoreboard:
+  enabled: true # Sidebar scoreboard enabled
+  update-interval-seconds: 5
+  lines:
+    - "&7Total items: &f%systemshop_total_items%"
+    - "&7On sale: &f%systemshop_items_on_sale%"
+    - "&7Diamond: &f%systemshop_price_DIAMOND%"
+    - "&7Market: &f%systemshop_market_multiplier%"
+    - "&7Mkt: &f%systemshop_market_chart%"
+  # Permission to opt-out per player; players with this permission will NOT see the scoreboard
+  opt-out-permission: "systemshop.scoreboard.optout"

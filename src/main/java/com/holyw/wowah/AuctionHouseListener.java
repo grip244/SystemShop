@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.ItemStack;
@@ -37,21 +38,42 @@ public class AuctionHouseListener implements Listener {
     }
 
     @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        String title = event.getView() == null ? "" : event.getView().getTitle();
+        String stripped = title == null ? "" : ChatColor.stripColor(title);
+        // Cancel drags inside any of our plugin GUIs
+        if (stripped.equals(ChatColor.stripColor(Lang.get("title-categories"))) ||
+                stripped.startsWith(ChatColor.stripColor(Lang.get("title-shop")).split(" - ")[0]) ||
+                stripped.equals(ChatColor.stripColor(Lang.get("title-confirm-purchase"))) ||
+                stripped.equals(ChatColor.stripColor(Lang.get("title-special-order")))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        String title = event.getView().getTitle();
+        String rawTitle = event.getView().getTitle();
+        String title = rawTitle == null ? "" : rawTitle;
+        String strippedTitle = ChatColor.stripColor(title);
         Player player = (Player) event.getWhoClicked();
 
-        if (title.equals(Lang.get("title-categories"))) {
+        // Category selection GUI
+        if (strippedTitle.equals(ChatColor.stripColor(Lang.get("title-categories")))) {
             event.setCancelled(true);
             ItemStack clickedItem = event.getCurrentItem();
             if (clickedItem == null || clickedItem.getType().isAir()) {
+                return;
+            }
+            if (clickedItem.getItemMeta() == null || clickedItem.getItemMeta().getDisplayName() == null) {
+                plugin.getLogger().warning("Clicked category item without a display name in GUI: " + clickedItem);
                 return;
             }
 
             String categoryName = ChatColor.stripColor(clickedItem.getItemMeta().getDisplayName());
             plugin.getAuctionHouseGUI().openAuctionHouse(player, categoryName, 1);
 
-        } else if (ChatColor.stripColor(title).startsWith(ChatColor.stripColor(Lang.get("title-shop")).split(" - ")[0])) {
+        // Shop view GUI (title: "Shop - {category} - Page {page}")
+        } else if (strippedTitle.startsWith(ChatColor.stripColor(Lang.get("title-shop")).split(" - ")[0])) {
 
             event.setCancelled(true);
             ItemStack clickedItem = event.getCurrentItem();
@@ -59,9 +81,21 @@ public class AuctionHouseListener implements Listener {
                 return;
             }
 
-            String[] titleParts = title.split(" - ");
-            String category = ChatColor.stripColor(titleParts[1]);
-            int currentPage = Integer.parseInt(title.substring(title.lastIndexOf(" ") + 1));
+            // Parse the stripped title safely
+            String[] titleParts = strippedTitle.split(" - ");
+            if (titleParts.length < 3) {
+                plugin.getLogger().warning("Unexpected shop title format: '" + title + "'");
+                return;
+            }
+            String category = titleParts[1];
+            int currentPage = 1;
+            try {
+                String pagePart = titleParts[2]; // e.g., "Page 1"
+                String[] pageParts = pagePart.split(" ");
+                currentPage = Integer.parseInt(pageParts[pageParts.length - 1]);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to parse current page from title: '" + title + "' - " + e.getMessage());
+            }
 
             // Handle page and sort buttons
             if (clickedItem.getType() == Material.ARROW) {

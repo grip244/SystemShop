@@ -66,3 +66,9 @@ button-cancel: "&cCancel"
 event-end: "&aThe market has returned to normal."
 event-market-crash: "&cMarket Crash! All prices have been temporarily reduced."
 event-market-boom: "&aMarket Boom! All prices have been temporarily increased."
+
+# Scoreboard messages
+scoreboard-shown: "&aScoreboard shown."
+scoreboard-hidden: "&eScoreboard hidden. You can re-enable it with /shop scoreboard"
+scoreboard-enabled: "&aScoreboard globally enabled."
+scoreboard-disabled: "&cScoreboard is currently disabled on this server."

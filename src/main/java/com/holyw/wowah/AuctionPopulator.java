@@ -80,6 +80,7 @@ public class AuctionPopulator {
         plugin.getAuctionHouseManager().addAuctionItems(allNewItems);
         plugin.getPricingManager().updateStockLevels();
         plugin.getServer().getConsoleSender().sendMessage(Lang.get("population-finish", "{size}", String.valueOf(allNewItems.size())));
+        // populate finished
     }
 
     private AuctionHouseManager.AuctionItem createAuctionItem(Material material) {
@@ -189,8 +190,10 @@ public class AuctionPopulator {
             } else {
                 originalName = formatDefaultItemName(item.getType());
             }
-            meta.setDisplayName(ChatColor.GOLD + "Mythic " + ChatColor.stripColor(originalName));
-            item.setItemMeta(meta);
+            if (meta != null) {
+                meta.setDisplayName(ChatColor.GOLD + "Mythic " + ChatColor.stripColor(originalName));
+                item.setItemMeta(meta);
+            }
 
             Collections.shuffle(possibleEnchantments);
             Set<Enchantment> appliedEnchantments = new HashSet<>();

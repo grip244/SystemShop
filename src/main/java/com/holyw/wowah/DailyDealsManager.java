@@ -14,6 +14,7 @@ public class DailyDealsManager {
 
     public void rotateDeals() {
         FileConfiguration config = plugin.getConfig();
+    // rotateDeals executed
         if (!config.getBoolean("daily-deals.enabled", true)) {
             return;
         }
@@ -47,5 +48,6 @@ public class DailyDealsManager {
             plugin.getLogger().info(message);
             plugin.getServer().broadcastMessage(message);
         }
+        // rotateDeals finished
     }
 }
