@@ -383,20 +383,20 @@ public class AuctionPopulator {
     public static String getCategory(Material material) {
         String name = material.name();
         // Check for legendary items first
-        if (name.equals("ELYTRA") || name.equals("BEACON") || name.equals("CONDUIT") || name.equals("DRAGON_EGG") || name.equals("NETHER_STAR")) {
+        if (name.equals("ELYTRA") || name.equals("BEACON") || name.equals("CONDUIT") || name.equals("DRAGON_EGG") || name.equals("NETHER_STAR") || name.equals("HEAVY_CORE") || name.equals("TOTEM_OF_UNDYING") || name.equals("SHULKER_BOX") || name.equals("SHULKER_SHELL") || name.equals("ENCHANTED_GOLDEN_APPLE")) {
             return AuctionHouseGUI.Category.LEGENDARY.getDisplayName();
         }
         // Use getDisplayName() to be consistent with the GUI
-        if (name.endsWith("_SWORD") || name.endsWith("_BOW") || name.endsWith("CROSSBOW") || name.equals("TIPPED_ARROW") || name.equals("SPECTRAL_ARROW") || (name.endsWith("_AXE") && !material.name().contains("PICKAXE"))) {
+        if (name.endsWith("_SWORD") || name.endsWith("_BOW") || name.endsWith("CROSSBOW") || name.equals("TIPPED_ARROW") || name.equals("SPECTRAL_ARROW") || (name.endsWith("_AXE") && !material.name().contains("PICKAXE") || name.equals("TRIDENT") || name.equals("MACE"))) {
             return AuctionHouseGUI.Category.WEAPONS.getDisplayName();
         }
         if (name.endsWith("_PICKAXE") || name.endsWith("_SHOVEL") || name.endsWith("_HOE") || name.endsWith("_AXE")) {
             return AuctionHouseGUI.Category.TOOLS.getDisplayName();
         }
-        if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS")) {
+        if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("SHIELD") || name.endsWith("_ARMOR") || !name.endsWith("_HORSE_ARMOR")) {
             return AuctionHouseGUI.Category.ARMOR.getDisplayName();
         }
-        if (name.endsWith("_INGOT") || name.endsWith("_NUGGET") || name.endsWith("_SCRAP") || name.endsWith("_ORE") || name.endsWith("_DUST") || name.startsWith("RAW_") || name.equals("DIAMOND") || name.equals("COAL") || name.equals("CHARCOAL") || name.equals("LAPIS_LAZULI") || name.equals("EMERALD") || name.equals("NETHER_QUARTZ")) {
+        if (name.endsWith("_INGOT") || name.endsWith("_NUGGET") || name.endsWith("_SCRAP") || name.endsWith("_ORE") || name.endsWith("_DUST") || name.startsWith("RAW_") || name.equals("DIAMOND") || name.equals("COAL") || name.equals("CHARCOAL") || name.equals("LAPIS_LAZULI") || name.equals("EMERALD") || name.equals("NETHER_QUARTZ") || name.equals("QUARTZ") || name.equals("REDSTONE")) {
             return AuctionHouseGUI.Category.MATERIALS.getDisplayName();
         }
         if (name.endsWith("SPAWNER")) {
@@ -409,7 +409,7 @@ public class AuctionPopulator {
             return AuctionHouseGUI.Category.ENCHANTED_BOOKS.getDisplayName();
         }
 
-        if (material.isEdible()) {
+        if (material.isEdible() && !name.equals("SPIDER_EYE") && !name.equals("ROTTEN_FLESH") && !name.equals("POISONOUS_POTATO") && !name.equals("PUFFERFISH") && !name.equals("CHORUS_FRUIT")) {
             return AuctionHouseGUI.Category.FOOD.getDisplayName();
         }
 
