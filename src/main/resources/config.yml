@@ -5,7 +5,7 @@ sleep:
   # The percentage of players in a world that need to be sleeping to skip the night. (0.5 = 50%)
   percentage-required: 0.5
 
-# Configuration for WoW Auction House
+# Configuration for SystemShop
 population:
   # The number of items to generate when the server starts up.
   initial-items: 1500

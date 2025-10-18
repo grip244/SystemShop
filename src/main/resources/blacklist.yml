@@ -1,4 +1,4 @@
-# A list of materials to prevent from being populated in the auction house.
+# A list of materials to prevent from being populated in the SystemShop.
 # Use the official material names from Minecraft.
 # Example: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 blacklist:

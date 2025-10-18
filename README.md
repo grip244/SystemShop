@@ -3,7 +3,7 @@
 
 [![Java CI with Maven](https://github.com/grip244/SystemShop/actions/workflows/maven.yml/badge.svg?branch=master)](https://github.com/grip244/SystemShop/actions/workflows/maven.yml)
 
-Tired of stagnant economies and empty auction houses? Want to create a vibrant, player-driven marketplace that thrives on any server, big or small? Look no further!
+Tired of stagnant economies and empty SystemShops? Want to create a vibrant, player-driven marketplace that thrives on any server, big or small? Look no further!
 
 System Shop is a complete reimagining of the server shop concept. It's not just a shop; it's a powerful, fully automated economic engine that brings your server to life. Whether you have a cozy community of 5 or a bustling metropolis of 500, System Shop creates a dynamic and engaging marketplace for everyone.
 
@@ -90,7 +90,7 @@ The Admin GUI (`/shop admin`) provides a powerful and intuitive way to manage yo
 
 If you have PlaceholderAPI installed, SystemShop exposes several placeholders under the `systemshop` identifier:
 
-- `%systemshop_total_items%` - Total number of items currently in the auction house.
+- `%systemshop_total_items%` - Total number of items currently in the SystemShop.
 - `%systemshop_items_on_sale%` - Number of items currently marked as on sale (daily deals / discounted).
 - `%systemshop_price_<MATERIAL>%` - Returns the configured price for a given material name. Example: `%systemshop_price_DIAMOND%`.
 
@@ -111,7 +111,7 @@ Examples — in-game (player context):
 
 Examples — config / server-side (no player required):
 ```
-Welcome! The auction house currently has %systemshop_total_items% items available.
+Welcome! The SystemShop currently has %systemshop_total_items% items available.
 Today's deals: %systemshop_items_on_sale%
 Diamond price: %systemshop_price_DIAMOND%
 ```

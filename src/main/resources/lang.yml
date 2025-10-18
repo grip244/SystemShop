@@ -33,7 +33,7 @@ population-start: "&e[SystemShop] &6Starting population of {items} new items."
 population-finish: "&a[SystemShop] Finished populating {size} new items across all categories."
 
 # Daily Deals
-total-items-in-ah: "&e[SystemShop] Total items in auction house: {count}"
+total-items-in-ah: "&e[SystemShop] Total items in SystemShop: {count}"
 items-on-sale: "&e[SystemShop] Number of items on sale: {count}"
 daily-deals-rotated: "&a[SystemShop] Daily deals have been rotated. {count} items are now on sale!"
 
