@@ -66,6 +66,28 @@ public class EventManager {
         }
     }
 
+    public void startBoom() {
+        FileConfiguration config = plugin.getConfig();
+        int duration = config.getInt("events.duration", 600) * 1000; // in seconds
+        eventEndTime = System.currentTimeMillis() + duration;
+        currentEvent = MarketEventType.MARKET_BOOM;
+        plugin.getServer().broadcastMessage(Lang.get("event-market-boom"));
+    }
+
+    public void startCrash() {
+        FileConfiguration config = plugin.getConfig();
+        int duration = config.getInt("events.duration", 600) * 1000; // in seconds
+        eventEndTime = System.currentTimeMillis() + duration;
+        currentEvent = MarketEventType.MARKET_CRASH;
+        plugin.getServer().broadcastMessage(Lang.get("event-market-crash"));
+    }
+
+    public void stopEvent() {
+        currentEvent = MarketEventType.NONE;
+        eventEndTime = System.currentTimeMillis();
+        plugin.getServer().broadcastMessage(Lang.get("event-end"));
+    }
+
     public MarketEventType getCurrentEvent() {
         return currentEvent;
     }

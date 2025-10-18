@@ -10,20 +10,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class AuctionHouseListener implements Listener {
 
     private final SystemShop plugin;
-    private final Map<UUID, AuctionHouseManager.AuctionItem> pendingConfirmations = new HashMap<>();
 
     public AuctionHouseListener(SystemShop plugin) {
         this.plugin = plugin;
@@ -32,10 +27,6 @@ public class AuctionHouseListener implements Listener {
 
 
 
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        pendingConfirmations.remove(event.getPlayer().getUniqueId());
-    }
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
@@ -44,7 +35,6 @@ public class AuctionHouseListener implements Listener {
         // Cancel drags inside any of our plugin GUIs
         if (stripped.equals(ChatColor.stripColor(Lang.get("title-categories"))) ||
                 stripped.startsWith(ChatColor.stripColor(Lang.get("title-shop")).split(" - ")[0]) ||
-                stripped.equals(ChatColor.stripColor(Lang.get("title-confirm-purchase"))) ||
                 stripped.equals(ChatColor.stripColor(Lang.get("title-special-order")))) {
             event.setCancelled(true);
         }
@@ -98,15 +88,21 @@ public class AuctionHouseListener implements Listener {
             }
 
             // Handle page and sort buttons
-            if (clickedItem.getType() == Material.ARROW) {
+            if (clickedItem.hasItemMeta() && clickedItem.getItemMeta().hasDisplayName()) {
                 String displayName = clickedItem.getItemMeta().getDisplayName();
                 if (displayName.equals(Lang.get("button-next-page"))) {
                     plugin.getAuctionHouseGUI().openAuctionHouse(player, category, currentPage + 1);
+                    return;
                 } else if (displayName.equals(Lang.get("button-prev-page"))) {
                     plugin.getAuctionHouseGUI().openAuctionHouse(player, category, currentPage - 1);
+                    return;
+                } else if (displayName.equals(Lang.get("button-back-categories"))) {
+                    plugin.getAuctionHouseGUI().openCategoryGUI(player);
+                    return;
                 }
-                return;
-            } else if (clickedItem.getType() == Material.HOPPER) {
+            }
+
+            if (clickedItem.getType() == Material.HOPPER) {
                 AuctionHouseGUI.SortPreference preference = plugin.getAuctionHouseGUI().getSortPreferences().get(player.getUniqueId());
                 if (preference != null) {
                     if (event.isLeftClick()) {
@@ -117,9 +113,6 @@ public class AuctionHouseListener implements Listener {
                     }
                 }
                 plugin.getAuctionHouseGUI().openAuctionHouse(player, category, currentPage);
-                return;
-            } else if (clickedItem.getType() == Material.BARRIER) {
-                plugin.getAuctionHouseGUI().openCategoryGUI(player);
                 return;
             }
 
@@ -147,30 +140,7 @@ public class AuctionHouseListener implements Listener {
                     .orElse(null);
 
             if (auctionItem != null) {
-                // Confirmation GUI for high-value items
-                if (auctionItem.getPrice() >= 50000) {
-                    openConfirmationGUI(player, auctionItem);
-                } else {
-                    purchaseItem(player, auctionItem, category, currentPage);
-                }
-            }
-        } else if (title.equals(Lang.get("title-confirm-purchase"))) {
-            event.setCancelled(true);
-            ItemStack clickedItem = event.getCurrentItem();
-            if (clickedItem == null || clickedItem.getType().isAir()) return;
-
-            AuctionHouseManager.AuctionItem itemToBuy = pendingConfirmations.get(player.getUniqueId());
-            if (itemToBuy == null) {
-                player.closeInventory();
-                return;
-            }
-
-            if (clickedItem.getType() == Material.GREEN_WOOL) {
-                // Find original category and page to refresh
-                String category = itemToBuy.getCategory();
-                purchaseItem(player, itemToBuy, category, 1); // Refresh to page 1 for simplicity
-            } else if (clickedItem.getType() == Material.RED_WOOL) {
-                player.closeInventory();
+                purchaseItem(player, auctionItem, category, currentPage);
             }
         } else if (title.equals(Lang.get("title-special-order"))) {
             event.setCancelled(true);
@@ -180,33 +150,13 @@ public class AuctionHouseListener implements Listener {
             }
 
             Material material = clickedItem.getType();
-            plugin.getSpecialOrdersManager().addSpecialOrder(material);
+            plugin.getSpecialOrdersManager().addSpecialOrder(player, material);
+            new AuctionPopulator(plugin).fulfillSpecialOrders();
             player.closeInventory();
             player.sendMessage(Lang.get("special-order-placed", "{item}", material.name()));
         }
     }
 
-    private void openConfirmationGUI(Player player, AuctionHouseManager.AuctionItem item) {
-        pendingConfirmations.put(player.getUniqueId(), item);
-        org.bukkit.inventory.Inventory inv = Bukkit.createInventory(null, 27, Lang.get("title-confirm-purchase"));
-
-        inv.setItem(13, item.getItemStack());
-
-        ItemStack confirm = new ItemStack(Material.GREEN_WOOL);
-        ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.setDisplayName(Lang.get("button-confirm-purchase"));
-        confirmMeta.setLore(Arrays.asList(Lang.get("item-price", "{price}", String.valueOf(item.getPrice()))));
-        confirm.setItemMeta(confirmMeta);
-        inv.setItem(11, confirm);
-
-        ItemStack cancel = new ItemStack(Material.RED_WOOL);
-        ItemMeta cancelMeta = cancel.getItemMeta();
-        cancelMeta.setDisplayName(Lang.get("button-cancel"));
-        cancel.setItemMeta(cancelMeta);
-        inv.setItem(15, cancel);
-
-        player.openInventory(inv);
-    }
 
     private void purchaseItem(Player player, AuctionHouseManager.AuctionItem auctionItem, String category, int currentPage) {
         Economy econ = SystemShop.getEconomy();
@@ -220,9 +170,6 @@ public class AuctionHouseListener implements Listener {
                 double commission = price * (commissionPercentage / 100.0);
                 double payout = price - commission;
                 econ.depositPlayer(Bukkit.getOfflinePlayer(auctionItem.getOriginalOwner()), payout);
-            } else if (!auctionItem.getSeller().equals(AuctionPopulator.SYSTEM_SELLER_UUID)) {
-                // This is for backward compatibility with old player auctions
-                econ.depositPlayer(Bukkit.getOfflinePlayer(auctionItem.getSeller()), price);
             }
 
             player.getInventory().addItem(auctionItem.getItemStack());

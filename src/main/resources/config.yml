@@ -31,6 +31,7 @@ population:
     tools: 4
     armor: 4
     potions: 8
+    food: 8
     blocks: 12
     materials: 5
     spawners: 2
@@ -56,6 +57,7 @@ daily-deals:
 
 # Pricing settings
 pricing:
+  food-multiplier: 1.2
   # The multiplier for the price when selling items to the shop.
   # For example, 0.75 means players get 75% of the item's value.
   sell-price-multiplier: 0.75

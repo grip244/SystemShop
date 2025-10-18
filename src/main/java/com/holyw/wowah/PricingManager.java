@@ -121,6 +121,11 @@ public class PricingManager {
             }
         }
 
+        // Apply food multiplier
+        if (AuctionPopulator.getCategory(itemStack.getType()).equals(AuctionHouseGUI.Category.FOOD.getDisplayName())) {
+            basePrice *= plugin.getConfig().getDouble("pricing.food-multiplier", 1.2);
+        }
+
         // Apply dynamic pricing
         FileConfiguration config = plugin.getConfig();
         if (config.getBoolean("pricing.dynamic-pricing.enabled", true)) {
@@ -171,5 +176,26 @@ public class PricingManager {
             }
         }
         return 1.0;
+    }
+
+    public void setPrice(ItemStack itemStack, double price) {
+        Essentials essentials = plugin.getEssentials();
+        if (essentials != null) {
+            try {
+                essentials.getWorth().setPrice(essentials, itemStack, price);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to set Essentials worth for " + itemStack.getType().name() + ": " + e.getMessage());
+            }
+        }
+
+        // Also save to pricing.yml as a special override
+        File pricingFile = new File(plugin.getDataFolder(), "pricing.yml");
+        pricingConfig.set("special-overrides." + itemStack.getType().name(), price + "," + price);
+        try {
+            pricingConfig.save(pricingFile);
+        } catch (java.io.IOException e) {
+            plugin.getLogger().warning("Failed to save pricing.yml: " + e.getMessage());
+        }
+        load(); // Reload the pricing config to apply the changes
     }
 }

@@ -28,7 +28,7 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 *   **Fully Automated & Intelligent:** The shop stocks itself with a balanced and exciting selection of items, with no admin intervention required.
 *   **Deeply Configurable:** From item spawn rates to enchantment levels, you have complete control over your server's economy.
 *   **Dynamic & Living Economy:** Prices ebb and flow based on supply and demand, and random server-wide events keep the market on its toes.
-*   **Player-Driven Market:** Empower your players to shape the economy with special orders and a consignment system for selling their own goods.
+*   **Player-Driven Market:** Empower your players to shape the economy with special orders.
 
 ## Core Features
 
@@ -37,6 +37,7 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 *   **Categorized & Organized:** Items are automatically sorted into intuitive categories like Weapons, Tools, Armor, Potions, and more.
 *   **Dynamic Enchantments & "God Items":** Items can spawn with random enchantments, with a chance to become ultra-rare "God Items" based on your own configurable templates!
 *   **Randomized Potions & Stacks:** Potions with desirable effects and varied stack sizes for materials create a realistic market feel.
+*   **Tipped Arrows:** A variety of tipped arrows are now available in the shop.
 *   **Blacklist System:** Easily prevent specific items from appearing in the shop.
 
 ### Dynamic & Living Economy
@@ -47,12 +48,11 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 
 ### Player-Driven Market
 
-*   **Special Orders:** Can't find what you're looking for? Players can place a "special order" for any item in the game, which the system will then try to stock for a premium.
-*   **Consignment System:** Give your players the power to sell their own items! Our intuitive consignment system allows players to list their items in the shop for a small fee, creating a true player-to-player marketplace.
+*   **Special Orders:** Can't find what you're looking for? Players can place a "special order" for any item in the game. The item will be added to the "Special Orders" category for them to purchase at a premium.
 
 ### Intuitive Player Experience
 
-*   **Clean & Modern GUI:** A sleek and easy-to-use interface makes browsing and buying a breeze.
+*   **Clean & Modern GUI:** A sleek and easy-to-use interface makes browsing and buying a breeze. With decorative panes and custom-textured buttons, the GUI is as beautiful as it is functional.
 *   **Sort & Filter:** Players can sort items by price to quickly find the best deals.
 *   **Simple Commands:** The entire system is accessible through the simple and intuitive `/shop` command.
 
@@ -67,10 +67,24 @@ System Shop is a complete reimagining of the server shop concept. It's not just 
 | Command | Description | Permission |
 | --- | --- | --- |
 | `/shop` | Opens the shop GUI. | `systemshop.use` |
+| `/shop help` | Displays a list of all available commands. | `systemshop.use` |
 | `/shop sell` | Sells the item(s) held in the players hand. | `systemshop.sell` |
 | `/shop order` | Opens the special order GUI for players to request items. | `systemshop.order` |
+| `/shop admin` | (Admin) Opens the admin GUI. | `systemshop.admin` |
 | `/shop refill` | (Admin) Clears and refills the shop with a fresh set of items. | `systemshop.admin` |
 | `/shop reload` | (Admin) Reloads the plugin's configuration. | `systemshop.admin` |
+
+### Admin GUI
+
+The Admin GUI (`/shop admin`) provides a powerful and intuitive way to manage your shop.
+
+*   **Manage Items:**
+    *   View all items in the shop, categorized for easy navigation.
+    *   Remove items from the shop by right-clicking them.
+    *   Edit the price of an item by left-clicking it and entering the new price in the chat.
+*   **Manage Market Events:**
+    *   Manually start a "Market Boom" or "Market Crash" event.
+    *   Stop the current market event.
 
 ## Placeholders
 
@@ -123,4 +137,3 @@ We welcome contributions of all kinds! If you have a feature request, bug report
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-

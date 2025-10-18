@@ -31,24 +31,28 @@ public class AuctionPopulator {
         this.plugin = plugin;
     }
 
+    public void fulfillSpecialOrders() {
+        int specialOrdersToFulfill = plugin.getConfig().getInt("population.special-orders-per-cycle", 5);
+        double priceMultiplier = plugin.getConfig().getDouble("population.special-order-price-multiplier", 2.0);
+        for (int i = 0; i < specialOrdersToFulfill; i++) {
+            SpecialOrdersManager.SpecialOrderRequest request = plugin.getSpecialOrdersManager().getAndRemoveNextSpecialOrder();
+            if (request != null) {
+                AuctionHouseManager.AuctionItem auctionItem = createAuctionItem(new ItemStack(request.getMaterial()));
+                double newPrice = auctionItem.getPrice() * priceMultiplier;
+                long duration = auctionItem.getExpiryTime() - System.currentTimeMillis();
+                plugin.getAuctionHouseManager().addAuctionItem(auctionItem.getItemStack(), SYSTEM_SELLER_UUID, request.getPlayerUuid(), newPrice, duration, "Special Orders");
+            } else {
+                break; // No more special orders
+            }
+        }
+    }
+
     public void populate(int itemsToCreate) {
         // Clear expired items first
         plugin.getAuctionHouseManager().getAuctionItems().removeIf(AuctionHouseManager.AuctionItem::hasExpired);
 
         // Fulfill special orders
-        int specialOrdersToFulfill = plugin.getConfig().getInt("population.special-orders-per-cycle", 5);
-        double priceMultiplier = plugin.getConfig().getDouble("population.special-order-price-multiplier", 2.0);
-        for (int i = 0; i < specialOrdersToFulfill; i++) {
-            Material material = plugin.getSpecialOrdersManager().getAndRemoveNextSpecialOrder();
-            if (material != null) {
-                AuctionHouseManager.AuctionItem auctionItem = createAuctionItem(new ItemStack(material));
-                double newPrice = auctionItem.getPrice() * priceMultiplier;
-                long duration = auctionItem.getExpiryTime() - System.currentTimeMillis();
-                plugin.getAuctionHouseManager().addAuctionItem(auctionItem.getItemStack(), auctionItem.getSeller(), newPrice, duration, auctionItem.getCategory());
-            } else {
-                break; // No more special orders
-            }
-        }
+        fulfillSpecialOrders();
 
         plugin.getServer().getConsoleSender().sendMessage(Lang.get("population-start", "{items}", String.valueOf(itemsToCreate)));
 
@@ -103,16 +107,25 @@ public class AuctionPopulator {
             stackSize = random.nextInt(64) + 1; // 1-64
         }
 
+        if (material == Material.TIPPED_ARROW) {
+            stackSize = random.nextInt(16) + 1; // 1-16
+        }
+
+        if (category.equals(AuctionHouseGUI.Category.FOOD.getDisplayName())) {
+            int maxStack = material.getMaxStackSize();
+            if (maxStack > 1) {
+                // Stack between 1 and a cap of 64, or maxStack if it's smaller
+                int upper_bound = Math.min(maxStack, 64);
+                stackSize = random.nextInt(upper_bound) + 1;
+            }
+        }
+
         if (category.equals(AuctionHouseGUI.Category.MISCELLANEOUS.getDisplayName())) {
             int maxStack = material.getMaxStackSize();
-            if (maxStack > 1 && random.nextBoolean()) { // 50% chance to stack
+            if (maxStack > 1) { 
                 // Stack between 2 and a cap of 16, or maxStack if it's smaller
                 int upper_bound = Math.min(maxStack, 16);
-                if (upper_bound > 2) {
-                    stackSize = random.nextInt(upper_bound - 2) + 2;
-                } else {
-                    stackSize = 2;
-                }
+                stackSize = random.nextInt(upper_bound) + 1;
             }
         }
 
@@ -127,6 +140,11 @@ public class AuctionPopulator {
         if (category.equals(AuctionHouseGUI.Category.POTIONS.getDisplayName())) {
             addRandomPotionEffect(itemStack);
         }
+
+        if (material == Material.TIPPED_ARROW) {
+            addRandomPotionEffectToArrow(itemStack);
+        }
+
         double price = (plugin.getPricingManager().getPrice(itemStack) + enchantmentValue) * stackSize;
         price = Math.round(price * 100.0) / 100.0;
  
@@ -306,6 +324,36 @@ public class AuctionPopulator {
         }
     }
 
+    private void addRandomPotionEffectToArrow(ItemStack item) {
+        if (item.getItemMeta() instanceof PotionMeta) {
+            PotionMeta meta = (PotionMeta) item.getItemMeta();
+            if (meta == null) {
+                meta = (PotionMeta) plugin.getServer().getItemFactory().getItemMeta(item.getType());
+            }
+            
+            // A list of base potion types that are desirable.
+            List<PotionType> desirableBaseTypes = Arrays.asList(
+                    PotionType.SWIFTNESS, PotionType.STRENGTH, PotionType.LEAPING, PotionType.REGENERATION,
+                    PotionType.FIRE_RESISTANCE, PotionType.WATER_BREATHING, PotionType.INVISIBILITY,
+                    PotionType.NIGHT_VISION, PotionType.SLOW_FALLING, PotionType.TURTLE_MASTER, PotionType.HEALING, PotionType.LONG_FIRE_RESISTANCE, PotionType.LONG_WATER_BREATHING, PotionType.LONG_INVISIBILITY, PotionType.LONG_NIGHT_VISION, PotionType.LONG_SLOW_FALLING, PotionType.LONG_SWIFTNESS, PotionType.LONG_STRENGTH, PotionType.LONG_LEAPING, PotionType.LONG_REGENERATION, PotionType.STRONG_HEALING, PotionType.STRONG_SWIFTNESS, PotionType.STRONG_STRENGTH, PotionType.STRONG_LEAPING, PotionType.STRONG_REGENERATION, PotionType.INFESTED, PotionType.LUCK, PotionType.WIND_CHARGED
+            );
+
+            // Pick a random base type
+            PotionType chosenType = desirableBaseTypes.get(random.nextInt(desirableBaseTypes.size()));
+
+            // Randomly decide to upgrade or extend the potion, if possible
+            if (chosenType.isExtendable() && random.nextBoolean()) {
+                chosenType = PotionType.valueOf("LONG_" + chosenType.name());
+            } else if (chosenType.isUpgradeable() && random.nextBoolean()) {
+                chosenType = PotionType.valueOf("STRONG_" + chosenType.name());
+            }
+
+            // Set the base potion type, which correctly names the potion and applies its effects.
+            meta.setBasePotionType(chosenType);
+            item.setItemMeta(meta);
+        }
+    }
+
     private Map<String, List<Material>> initializeAndCategorizeMaterials() {
         Map<String, List<Material>> categorized = new HashMap<>();
         List<String> blacklist = plugin.getItemBlacklist();
@@ -339,7 +387,7 @@ public class AuctionPopulator {
             return AuctionHouseGUI.Category.LEGENDARY.getDisplayName();
         }
         // Use getDisplayName() to be consistent with the GUI
-        if (name.endsWith("_SWORD") || name.endsWith("_BOW") || (name.endsWith("_AXE") && !material.name().contains("PICKAXE"))) {
+        if (name.endsWith("_SWORD") || name.endsWith("_BOW") || name.endsWith("CROSSBOW") || name.equals("TIPPED_ARROW") || name.equals("SPECTRAL_ARROW") || (name.endsWith("_AXE") && !material.name().contains("PICKAXE"))) {
             return AuctionHouseGUI.Category.WEAPONS.getDisplayName();
         }
         if (name.endsWith("_PICKAXE") || name.endsWith("_SHOVEL") || name.endsWith("_HOE") || name.endsWith("_AXE")) {
@@ -359,6 +407,10 @@ public class AuctionPopulator {
         }
         if (name.equals("ENCHANTED_BOOK")) {
             return AuctionHouseGUI.Category.ENCHANTED_BOOKS.getDisplayName();
+        }
+
+        if (material.isEdible()) {
+            return AuctionHouseGUI.Category.FOOD.getDisplayName();
         }
 
         if (material.isBlock()) {

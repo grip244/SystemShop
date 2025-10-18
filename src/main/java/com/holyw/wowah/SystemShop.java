@@ -24,6 +24,7 @@ public class SystemShop extends JavaPlugin {
     private static Economy econ = null;
     private AuctionHouseManager auctionHouseManager;
     private AuctionHouseGUI auctionHouseGUI;
+    private AdminGUI adminGUI;
     private PricingManager pricingManager;
     private EventManager eventManager;
     private SpecialOrdersManager specialOrdersManager;
@@ -50,6 +51,7 @@ public class SystemShop extends JavaPlugin {
         setupBlacklist();
         auctionHouseManager = new AuctionHouseManager(this);
         auctionHouseGUI = new AuctionHouseGUI(this);
+        adminGUI = new AdminGUI(this);
         pricingManager = new PricingManager(this);
         eventManager = new EventManager(this);
         specialOrdersManager = new SpecialOrdersManager(this);
@@ -90,6 +92,7 @@ public class SystemShop extends JavaPlugin {
         new AuctionHouseListener(this);
         new SleepListener(this);
         new MOTDListener(this);
+        new AdminGUIListener(this);
         getLogger().info(Lang.get("plugin-enabled"));
 
         // bStats
@@ -190,6 +193,36 @@ public class SystemShop extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("shop")) {
+            if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
+                sender.sendMessage("§6--- SystemShop Help ---");
+                sender.sendMessage("§e/shop - Opens the shop GUI.");
+                sender.sendMessage("§e/shop sell - Sells the item in your hand.");
+                sender.sendMessage("§e/shop order - Opens the special order GUI.");
+                sender.sendMessage("§e/shop scoreboard - Toggles the scoreboard.");
+                if (sender.hasPermission("systemshop.admin")) {
+                    sender.sendMessage("§c--- Admin Commands ---");
+                    sender.sendMessage("§e/shop admin - Opens the admin GUI.");
+                    sender.sendMessage("§e/shop refill - Refills the shop.");
+                    sender.sendMessage("§e/shop reload - Reloads the config.");
+                    sender.sendMessage("§e/shop scoreboard toggle - Toggles the scoreboard globally.");
+                }
+                return true;
+            }
+
+            if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
+                if (sender.hasPermission("systemshop.admin")) {
+                    if (sender instanceof Player) {
+                        Player player = (Player) sender;
+                        adminGUI.openAdminGUI(player);
+                    } else {
+                        sender.sendMessage(Lang.get("player-only"));
+                    }
+                } else {
+                    sender.sendMessage(Lang.get("no-permission"));
+                }
+                return true;
+            }
+
             if (args.length > 0 && args[0].equalsIgnoreCase("refill")) {
                 if (sender instanceof ConsoleCommandSender) {
                     auctionHouseManager.clearSystemAuctions();
@@ -215,17 +248,6 @@ public class SystemShop extends JavaPlugin {
                 return true;
             }
 
-            if (args.length > 0 && args[0].equalsIgnoreCase("purge")) {
-                if(args.length > 1 && args[1].equalsIgnoreCase("playerauctions")) {
-                    if (sender.hasPermission("systemshop.admin")) {
-                        auctionHouseManager.clearPlayerAuctions(); // This method is now redundant if no players can sell
-                        sender.sendMessage(Lang.get("player-auctions-purged"));
-                    } else {
-                        sender.sendMessage(Lang.get("no-permission"));
-                    }
-                    return true;
-                }
-            }
 
             if (args.length > 0 && args[0].equalsIgnoreCase("order")) {
                 if (sender instanceof Player) {
@@ -325,21 +347,23 @@ public class SystemShop extends JavaPlugin {
         if (command.getName().equalsIgnoreCase("shop")) {
             if (args.length == 1) {
                 List<String> subcommands = new ArrayList<>();
-                if (sender.hasPermission("systemshop.admin")) {
-                    subcommands.add("refill");
-                    subcommands.add("purge");
-                    subcommands.add("reload");
-                }
+                subcommands.add("help");
                 subcommands.add("order");
                 subcommands.add("sell");
+                subcommands.add("scoreboard");
+                if (sender.hasPermission("systemshop.admin")) {
+                    subcommands.add("admin");
+                    subcommands.add("refill");
+                    subcommands.add("reload");
+                }
 
                 return subcommands.stream()
                         .filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase()))
                         .collect(Collectors.toList());
             } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("purge") && sender.hasPermission("systemshop.admin")) {
-                    if ("playerauctions".toLowerCase().startsWith(args[1].toLowerCase())) {
-                        return Collections.singletonList("playerauctions");
+                if (args[0].equalsIgnoreCase("scoreboard")) {
+                    if ("toggle".toLowerCase().startsWith(args[1].toLowerCase())) {
+                        return Collections.singletonList("toggle");
                     }
                 }
             }
@@ -363,8 +387,8 @@ public class SystemShop extends JavaPlugin {
         return pricingManager;
     }
 
-    public BuybackManager getBuybackManager() {
-        return buybackManager;
+    public AdminGUI getAdminGUI() {
+        return adminGUI;
     }
 
     public List<String> getItemBlacklist() {

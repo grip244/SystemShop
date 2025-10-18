@@ -1,6 +1,7 @@
 package com.holyw.wowah;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -8,10 +9,24 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.ChatColor;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
-import java.util.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AuctionHouseGUI {
@@ -32,6 +47,7 @@ public class AuctionHouseGUI {
 
     public enum Category {
         DAILY_DEALS(Material.GOLD_INGOT, "Daily Deals"),
+        SPECIAL_ORDERS(Material.WRITABLE_BOOK, "Special Orders"),
         WEAPONS(Material.DIAMOND_SWORD, "Weapons"),
         TOOLS(Material.DIAMOND_PICKAXE, "Tools"),
         ARMOR(Material.DIAMOND_CHESTPLATE, "Armor"),
@@ -42,6 +58,7 @@ public class AuctionHouseGUI {
         SPAWN_EGGS(Material.PIG_SPAWN_EGG, "Spawn Eggs"), // Display name is correct
         ENCHANTED_BOOKS(Material.ENCHANTED_BOOK, "Enchanted Books"),
         LEGENDARY(Material.NETHER_STAR, "Legendary Items"),
+        FOOD(Material.COOKED_BEEF, "Food"),
         MISCELLANEOUS(Material.BUCKET, "Miscellaneous");
 
         private final Material icon;
@@ -100,6 +117,16 @@ public class AuctionHouseGUI {
             item.setItemMeta(meta);
             inv.addItem(item);
         }
+        // Fill empty slots with glass panes
+        ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta fillerMeta = filler.getItemMeta();
+        fillerMeta.setDisplayName(" ");
+        filler.setItemMeta(fillerMeta);
+        for (int i = 0; i < inv.getSize(); i++) {
+            if (inv.getItem(i) == null) {
+                inv.setItem(i, filler);
+            }
+        }
         player.openInventory(inv);
     }
 
@@ -107,10 +134,13 @@ public class AuctionHouseGUI {
         SortPreference preference = sortPreferences.computeIfAbsent(player.getUniqueId(), k -> new SortPreference());
 
         List<AuctionHouseManager.AuctionItem> items;
-        // This is a category view
         if (category.equalsIgnoreCase(Category.DAILY_DEALS.getDisplayName())) {
             items = plugin.getAuctionHouseManager().getAuctionItems().stream()
                     .filter(item -> !item.hasExpired() && item.isOnSale())
+                    .collect(Collectors.toList());
+        } else if (category.equalsIgnoreCase(Category.SPECIAL_ORDERS.getDisplayName())) {
+            items = plugin.getAuctionHouseManager().getAuctionItems().stream()
+                    .filter(item -> !item.hasExpired() && category.equalsIgnoreCase(item.getCategory()) && player.getUniqueId().equals(item.getOriginalOwner()))
                     .collect(Collectors.toList());
         } else {
             items = plugin.getAuctionHouseManager().getAuctionItems().stream()
@@ -189,12 +219,12 @@ public class AuctionHouseGUI {
         }
 
         // Add control buttons
-        ItemStack prevPage = new ItemStack(Material.ARROW);
+        ItemStack prevPage = createSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhhODZiYjRmY2FjMzg2MmFhZDNkNTEzOTNmYWE3YTFjZjM1NTNlNDkzNDEwM2VkNDVhYzJhOWE4ODhlYjlhIn19fQ==");
         ItemMeta prevMeta = prevPage.getItemMeta();
         prevMeta.setDisplayName(Lang.get("button-prev-page"));
         prevPage.setItemMeta(prevMeta);
 
-        ItemStack nextPage = new ItemStack(Material.ARROW);
+        ItemStack nextPage = createSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzk4OTVkNThhMDQ2MjZkNWNjZTE4NzY5ZDU0MTk4ZDAzNTVmZDc3MDY4M2JkZmI3MTc2ZDA4Yzc1NDdkZSJ9fX0=");
         ItemMeta nextMeta = nextPage.getItemMeta();
         nextMeta.setDisplayName(Lang.get("button-next-page"));
         nextPage.setItemMeta(nextMeta);
@@ -213,6 +243,15 @@ public class AuctionHouseGUI {
         backMeta.setDisplayName(Lang.get("button-back-categories"));
         backButton.setItemMeta(backMeta);
 
+        // Fill empty slots with glass panes
+        ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta fillerMeta = filler.getItemMeta();
+        fillerMeta.setDisplayName(" ");
+        filler.setItemMeta(fillerMeta);
+        for (int i = 45; i < 54; i++) {
+            inv.setItem(i, filler);
+        }
+
         if (page > 1) {
             inv.setItem(45, prevPage);
         }
@@ -223,6 +262,36 @@ public class AuctionHouseGUI {
         }
 
         player.openInventory(inv);
+    }
+
+    private ItemStack createSkull(String base64) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        if (base64 == null || base64.isEmpty()) {
+            return head;
+        }
+        SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+        headMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "");
+        PlayerTextures textures = profile.getTextures();
+        URL url;
+        try {
+            String decoded = new String(Base64.getDecoder().decode(base64));
+            Pattern pattern = Pattern.compile("\"url\"\s*:\s*\"(.*?)\"" );
+            Matcher matcher = pattern.matcher(decoded);
+            if (matcher.find()) {
+                url = URI.create(matcher.group(1)).toURL();
+            } else {
+                return head;
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return head;
+        }
+        textures.setSkin(url);
+        profile.setTextures(textures);
+        headMeta.setOwnerProfile(profile);
+        head.setItemMeta(headMeta);
+        return head;
     }
 
     public Map<UUID, SortPreference> getSortPreferences() {

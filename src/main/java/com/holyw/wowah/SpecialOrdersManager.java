@@ -9,10 +9,29 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class SpecialOrdersManager {
 
-    private final List<Material> specialOrders = new ArrayList<>();
+    private final List<SpecialOrderRequest> specialOrders = new ArrayList<>();
+
+    public static class SpecialOrderRequest {
+        private final UUID playerUuid;
+        private final Material material;
+
+        public SpecialOrderRequest(UUID playerUuid, Material material) {
+            this.playerUuid = playerUuid;
+            this.material = material;
+        }
+
+        public UUID getPlayerUuid() {
+            return playerUuid;
+        }
+
+        public Material getMaterial() {
+            return material;
+        }
+    }
 
     public SpecialOrdersManager(SystemShop plugin) {
     }
@@ -31,15 +50,12 @@ public class SpecialOrdersManager {
         player.openInventory(inv);
     }
 
-    public void addSpecialOrder(Material material) {
-        specialOrders.add(material);
+    public void addSpecialOrder(Player player, Material material) {
+        specialOrders.add(new SpecialOrderRequest(player.getUniqueId(), material));
     }
 
-    public List<Material> getSpecialOrders() {
-        return specialOrders;
-    }
 
-    public Material getAndRemoveNextSpecialOrder() {
+    public SpecialOrderRequest getAndRemoveNextSpecialOrder() {
         if (!specialOrders.isEmpty()) {
             return specialOrders.remove(0);
         }

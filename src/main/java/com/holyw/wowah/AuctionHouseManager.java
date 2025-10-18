@@ -63,17 +63,7 @@ public class AuctionHouseManager {
         plugin.getPricingManager().updateStockLevels();
     }
 
-    public void clearPlayerAuctions() {
-        auctionItems.removeIf(item -> !item.getSeller().equals(AuctionPopulator.SYSTEM_SELLER_UUID));
-        saveAuctionItems();
-        plugin.getPricingManager().updateStockLevels();
-    }
 
-    public void clearAllAuctions() {
-        auctionItems.clear();
-        saveAuctionItems();
-        plugin.getPricingManager().updateStockLevels();
-    }
 
     public List<AuctionItem> getAuctionItems() {
         return auctionItems;
@@ -131,7 +121,7 @@ public class AuctionHouseManager {
         private final ItemStack itemStack;
         private final UUID seller;
         private final UUID originalOwner;
-        private final double price;
+        private double price;
         private final long expiryTime;
         private final String category;
         private double discountPercentage = 0.0; // 0.0 = no discount, 0.2 = 20% off
@@ -176,6 +166,10 @@ public class AuctionHouseManager {
                 return Math.round(discountedPrice * 100.0) / 100.0;
             }
             return Math.round(price * 100.0) / 100.0;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
         }
 
         public long getExpiryTime() {
