@@ -393,7 +393,7 @@ public class AuctionPopulator {
         if (name.endsWith("_PICKAXE") || name.endsWith("_SHOVEL") || name.endsWith("_HOE") || name.endsWith("_AXE")) {
             return AuctionHouseGUI.Category.TOOLS.getDisplayName();
         }
-        if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("SHIELD") || name.endsWith("_ARMOR") || !name.endsWith("_HORSE_ARMOR")) {
+        if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("SHIELD") || name.endsWith("_ARMOR") && !name.endsWith("_HORSE_ARMOR")) {
             return AuctionHouseGUI.Category.ARMOR.getDisplayName();
         }
         if (name.endsWith("_INGOT") || name.endsWith("_NUGGET") || name.endsWith("_SCRAP") || name.endsWith("_ORE") || name.endsWith("_DUST") || name.startsWith("RAW_") || name.equals("DIAMOND") || name.equals("COAL") || name.equals("CHARCOAL") || name.equals("LAPIS_LAZULI") || name.equals("EMERALD") || name.equals("NETHER_QUARTZ") || name.equals("QUARTZ") || name.equals("REDSTONE")) {
@@ -413,7 +413,7 @@ public class AuctionPopulator {
             return AuctionHouseGUI.Category.FOOD.getDisplayName();
         }
 
-        if (material.isBlock()) {
+        if (material.isBlock() || name.endsWith("_SAPLING") || name.endsWith("_PROPOGULE")) {
             return AuctionHouseGUI.Category.BLOCKS.getDisplayName();
         }
         if (name.endsWith("_SPAWN_EGG")) {
