@@ -13,6 +13,8 @@ player-only: "&cOnly players can use this command!"
 shop-refilled: "&aSystem shop refilled."
 config-reloaded: "&aSystem Shop configuration reloaded."
 player-auctions-purged: "&aAll player auctions have been purged."
+healthbar-enabled: "&aHealth bars enabled."
+healthbar-disabled: "&cHealth bars disabled."
 
 # Purchase Messages
 item-bought: "&aYou have bought the item for {price}!"
@@ -72,3 +74,8 @@ scoreboard-shown: "&aScoreboard shown."
 scoreboard-hidden: "&eScoreboard hidden. You can re-enable it with /shop scoreboard"
 scoreboard-enabled: "&aScoreboard globally enabled."
 scoreboard-disabled: "&cScoreboard is currently disabled on this server."
+
+# Health Bar
+healthbar-health-style: "&c❤ {health}/{max_health}"
+healthbar-armor-style: "&9🛡 {armor}"
+healthbar-cleaned: "&aRemoved {count} old health bar armor stands."

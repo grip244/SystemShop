@@ -37,3 +37,6 @@
 /target/classes/com/holyw/wowah/AdminGUIListener.class
 /target/classes/com/holyw/wowah/AdminGUIListener$1.class
 /target/classes/com/holyw/wowah/SpecialOrdersManager$SpecialOrderRequest.class
+/target/classes/com/holyw/wowah/HealthBar.class
+/target/classes/com/holyw/wowah/HealthBarListener.class
+/target/classes/com/holyw/wowah/HealthBarManager.class

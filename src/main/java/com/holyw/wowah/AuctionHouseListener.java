@@ -22,7 +22,6 @@ public class AuctionHouseListener implements Listener {
 
     public AuctionHouseListener(SystemShop plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
 

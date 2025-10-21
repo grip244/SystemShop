@@ -1,6 +1,9 @@
 package com.holyw.wowah;
 
 import com.earth2me.essentials.Essentials;
+import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import net.milkbowl.vault.economy.Economy;
@@ -31,6 +34,7 @@ public class SystemShop extends JavaPlugin {
     private DailyDealsManager dailyDealsManager;
     private ShopScoreboard shopScoreboard;
     private BuybackManager buybackManager;
+    private HealthBarManager healthBarManager;
     private List<String> itemBlacklist;
     private Essentials essentials = null;
     private FileConfiguration motdConfig = null;
@@ -47,6 +51,13 @@ public class SystemShop extends JavaPlugin {
         setupPlaceholderAPI();
         this.saveDefaultConfig();
         Lang.load(this);
+
+        if (this.getConfig().getBoolean("healthbar.enabled", true)) {
+            getLogger().info("Health Bar feature is enabled in config.yml.");
+        } else {
+            getLogger().info("Health Bar feature is disabled in config.yml.");
+        }
+
         loadMotdConfig();
         setupBlacklist();
         auctionHouseManager = new AuctionHouseManager(this);
@@ -57,6 +68,15 @@ public class SystemShop extends JavaPlugin {
         specialOrdersManager = new SpecialOrdersManager(this);
         dailyDealsManager = new DailyDealsManager(this);
         buybackManager = new BuybackManager(this);
+        healthBarManager = new HealthBarManager(this);
+        getServer().getPluginManager().registerEvents(new HealthBarListener(healthBarManager), this);
+        healthBarManager.startUpdater();
+
+        // Enable health bars after a tick to ensure all entities are loaded
+        getServer().getScheduler().runTaskLater(this, () -> {
+            healthBarManager.enableHealthBars();
+        }, 1L);
+
         // Decide initial population behavior.
         // If daily-deals are configured to refill the shop on rotate, run the rotation once on startup
         // so that the populator is executed inside rotateDeals (ensures deals are applied immediately).
@@ -89,10 +109,10 @@ public class SystemShop extends JavaPlugin {
         }
         shopScoreboard = new ShopScoreboard(this);
         shopScoreboard.enable();
-        new AuctionHouseListener(this);
-        new SleepListener(this);
-        new MOTDListener(this);
-        new AdminGUIListener(this);
+        getServer().getPluginManager().registerEvents(new AuctionHouseListener(this), this);
+        getServer().getPluginManager().registerEvents(new SleepListener(this), this);
+        getServer().getPluginManager().registerEvents(new MOTDListener(this), this);
+        getServer().getPluginManager().registerEvents(new AdminGUIListener(this), this);
         getLogger().info(Lang.get("plugin-enabled"));
 
         // bStats
@@ -130,6 +150,10 @@ public class SystemShop extends JavaPlugin {
         auctionHouseManager.clearSystemAuctions();
         if (shopScoreboard != null) {
             shopScoreboard.disable();
+        }
+        if (healthBarManager != null) {
+            healthBarManager.stopUpdater();
+            healthBarManager.removeAllHealthBars();
         }
         getLogger().info(Lang.get("plugin-disabled"));
     }
@@ -205,6 +229,48 @@ public class SystemShop extends JavaPlugin {
                     sender.sendMessage("§e/shop refill - Refills the shop.");
                     sender.sendMessage("§e/shop reload - Reloads the config.");
                     sender.sendMessage("§e/shop scoreboard toggle - Toggles the scoreboard globally.");
+                    sender.sendMessage("§e/shop healthbar - Toggles health bars.");
+                    sender.sendMessage("§e/shop healthbar cleanup - Removes old health bars.");
+                }
+                return true;
+            }
+
+            if (args.length > 0 && args[0].equalsIgnoreCase("healthbar")) {
+                if (args.length > 1 && args[1].equalsIgnoreCase("cleanup")) {
+                    if (sender.hasPermission("systemshop.admin")) {
+                        int removedCount = 0;
+                        for (World world : getServer().getWorlds()) {
+                            for (Entity entity : world.getEntities()) {
+                                if (entity instanceof ArmorStand) {
+                                    ArmorStand as = (ArmorStand) entity;
+                                    String name = as.getCustomName();
+                                    if (name != null && name.contains("❤") && name.contains(" | ")) {
+                                        as.remove();
+                                        removedCount++;
+                                    }
+                                }
+                            }
+                        }
+                        sender.sendMessage(Lang.get("healthbar-cleaned", "{count}", String.valueOf(removedCount)));
+                    } else {
+                        sender.sendMessage(Lang.get("no-permission"));
+                    }
+                    return true;
+                }
+
+                if (sender.hasPermission("systemshop.admin")) {
+                    boolean enabled = !this.getConfig().getBoolean("healthbar.enabled", true);
+                    this.getConfig().set("healthbar.enabled", enabled);
+                    this.saveConfig();
+                    if (enabled) {
+                        healthBarManager.enableHealthBars();
+                        sender.sendMessage(Lang.get("healthbar-enabled"));
+                    } else {
+                        healthBarManager.disableHealthBars();
+                        sender.sendMessage(Lang.get("healthbar-disabled"));
+                    }
+                } else {
+                    sender.sendMessage(Lang.get("no-permission"));
                 }
                 return true;
             }
@@ -355,6 +421,7 @@ public class SystemShop extends JavaPlugin {
                     subcommands.add("admin");
                     subcommands.add("refill");
                     subcommands.add("reload");
+                    subcommands.add("healthbar");
                 }
 
                 return subcommands.stream()
@@ -364,6 +431,10 @@ public class SystemShop extends JavaPlugin {
                 if (args[0].equalsIgnoreCase("scoreboard")) {
                     if ("toggle".toLowerCase().startsWith(args[1].toLowerCase())) {
                         return Collections.singletonList("toggle");
+                    }
+                } else if (args[0].equalsIgnoreCase("healthbar")) {
+                    if ("cleanup".toLowerCase().startsWith(args[1].toLowerCase())) {
+                        return Collections.singletonList("cleanup");
                     }
                 }
             }
@@ -389,6 +460,10 @@ public class SystemShop extends JavaPlugin {
 
     public AdminGUI getAdminGUI() {
         return adminGUI;
+    }
+
+    public HealthBarManager getHealthBarManager() {
+        return healthBarManager;
     }
 
     public List<String> getItemBlacklist() {

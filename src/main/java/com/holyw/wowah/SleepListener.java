@@ -22,7 +22,6 @@ public class SleepListener implements Listener {
 
     public SleepListener(SystemShop plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

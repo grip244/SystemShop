@@ -20,7 +20,6 @@ public class AdminGUIListener implements Listener {
 
     public AdminGUIListener(SystemShop plugin) {
         this.plugin = plugin;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
