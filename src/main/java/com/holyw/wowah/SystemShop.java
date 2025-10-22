@@ -69,12 +69,13 @@ public class SystemShop extends JavaPlugin {
         dailyDealsManager = new DailyDealsManager(this);
         buybackManager = new BuybackManager(this);
         healthBarManager = new HealthBarManager(this);
-        getServer().getPluginManager().registerEvents(new HealthBarListener(healthBarManager), this);
-        healthBarManager.startUpdater();
+        getServer().getPluginManager().registerEvents(new HealthBarListener(this, healthBarManager), this);
 
         // Enable health bars after a tick to ensure all entities are loaded
         getServer().getScheduler().runTaskLater(this, () -> {
-            healthBarManager.enableHealthBars();
+            if (this.getConfig().getBoolean("healthbar.enabled", true)) {
+                healthBarManager.enableHealthBars();
+            }
         }, 1L);
 
         // Decide initial population behavior.

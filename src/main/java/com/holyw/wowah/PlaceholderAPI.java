@@ -38,12 +38,12 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier) {
         // Server-side placeholders (work even if player is null)
         if (identifier.equals("total_items")) {
-            return String.valueOf(plugin.getAuctionHouseManager().getTotalItems());
+            return String.format("%,d", plugin.getAuctionHouseManager().getTotalItems());
         }
 
         if (identifier.equals("items_on_sale")) {
             long discounted = plugin.getAuctionHouseManager().getAuctionItems().stream().filter(com.holyw.wowah.AuctionHouseManager.AuctionItem::isOnSale).count();
-            return String.valueOf(discounted);
+            return String.format("%,d", discounted);
         }
 
         if (identifier.equals("market_status")) {
@@ -68,7 +68,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
             try {
                 Material material = Material.valueOf(mat);
                 double price = plugin.getPricingManager().getPrice(new ItemStack(material));
-                return String.valueOf(price);
+                return String.format("%,.2f", price);
             } catch (IllegalArgumentException e) {
                 return "";
             }

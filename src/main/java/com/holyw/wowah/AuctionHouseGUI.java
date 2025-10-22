@@ -201,11 +201,11 @@ public class AuctionHouseGUI {
                 List<String> lore = new ArrayList<>();
                 lore.add(Lang.get("item-seller", "{seller}", sellerName));
                 if (item.isOnSale()) {
-                    lore.add("§m" + Lang.get("item-price", "{price}", String.valueOf(item.getOriginalPrice())));
+                    lore.add("§m" + Lang.get("item-price", "{price}", String.format("%,.2f", item.getOriginalPrice())));
                     int percentOff = (int) (item.getDiscountPercentage() * 100);
-                    lore.add(Lang.get("item-price-discounted", "{percent}", String.valueOf(percentOff), "{price}", String.valueOf(item.getPrice())));
+                    lore.add(Lang.get("item-price-discounted", "{percent}", String.valueOf(percentOff), "{price}", String.format("%,.2f", item.getPrice())));
                 } else {
-                    lore.add(Lang.get("item-price", "{price}", String.valueOf(item.getPrice())));
+                    lore.add(Lang.get("item-price", "{price}", String.format("%,.2f", item.getPrice())));
                 }
                 lore.add(Lang.get("item-expires", "{time}", formatDuration(item.getExpiryTime() - System.currentTimeMillis())));
 

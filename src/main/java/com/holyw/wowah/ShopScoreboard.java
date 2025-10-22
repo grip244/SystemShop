@@ -86,7 +86,7 @@ public class ShopScoreboard implements Listener {
         Objective obj = board.getObjective("systemshop");
         if (obj == null) {
             // Use modern API (non-deprecated) to register objective without Adventure
-            obj = board.registerNewObjective("systemshop", Criteria.DUMMY, ChatColor.GOLD + "SystemShop");
+            obj = board.registerNewObjective("systemshop", Criteria.DUMMY, ChatColor.translateAlternateColorCodes('&', "&6&l« &e&lSystemShop &6&l»"));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         }
         setLines(board, player);
@@ -159,7 +159,7 @@ public class ShopScoreboard implements Listener {
         if (converted.contains("%systemshop_price_DIAMOND%")) {
             try {
                 double price = plugin.getPricingManager().getPrice(new ItemStack(Material.DIAMOND));
-                converted = converted.replace("%systemshop_price_DIAMOND%", String.valueOf(price));
+                converted = converted.replace("%systemshop_price_DIAMOND%", String.format("%,.2f", price));
             } catch (Exception ex) {
                 converted = converted.replace("%systemshop_price_DIAMOND%", "");
             }

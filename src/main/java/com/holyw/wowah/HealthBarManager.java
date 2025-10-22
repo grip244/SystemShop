@@ -116,6 +116,10 @@ public class HealthBarManager {
         }
     }
 
+    public boolean isUpdaterRunning() {
+        return updaterTask != null && !updaterTask.isCancelled();
+    }
+
     public void removeAllHealthBars() {
         stopUpdater();
         for (UUID entityId : new ArrayList<>(healthBars.keySet())) {

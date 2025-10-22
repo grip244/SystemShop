@@ -10,12 +10,15 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 
 public class HealthBarListener implements Listener {
 
     private final HealthBarManager healthBarManager;
+    private final SystemShop plugin;
 
-    public HealthBarListener(HealthBarManager healthBarManager) {
+    public HealthBarListener(SystemShop plugin, HealthBarManager healthBarManager) {
+        this.plugin = plugin;
         this.healthBarManager = healthBarManager;
     }
 
@@ -33,6 +36,11 @@ public class HealthBarListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         healthBarManager.handlePlayerJoin(event.getPlayer());
+        if (plugin.getConfig().getBoolean("healthbar.enabled", true)) {
+            if (!healthBarManager.isUpdaterRunning()) {
+                healthBarManager.enableHealthBars();
+            }
+        }
     }
 
     @EventHandler
@@ -62,5 +70,14 @@ public class HealthBarListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         healthBarManager.createHealthBar(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        for (org.bukkit.entity.Entity entity : event.getChunk().getEntities()) {
+            if (entity instanceof LivingEntity && !(entity instanceof org.bukkit.entity.Player) && !(entity instanceof org.bukkit.entity.ArmorStand)) {
+                healthBarManager.createHealthBar((LivingEntity) entity);
+            }
+        }
     }
 }

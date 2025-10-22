@@ -8,25 +8,21 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.logging.Logger;
 
 public class HealthBar {
 
     private final LivingEntity entity;
     private ArmorStand healthArmorStand;
     private ArmorStand armorArmorStand;
-    private final Logger logger;
     private final SystemShop plugin;
 
     public HealthBar(LivingEntity entity, SystemShop plugin) {
         this.entity = entity;
         this.plugin = plugin;
-        this.logger = plugin.getLogger();
         create();
     }
 
     private void create() {
-        logger.info("[HB CREATE] For " + entity.getName() + " (" + entity.getUniqueId() + ")");
         NamespacedKey key = new NamespacedKey(plugin, "healthbar_owner");
         String ownerUUID = entity.getUniqueId().toString();
 
@@ -40,8 +36,7 @@ public class HealthBar {
             as.setCustomNameVisible(true);
             as.getPersistentDataContainer().set(key, PersistentDataType.STRING, ownerUUID);
         });
-        logger.info("[HB CREATE] Spawned health stand " + healthArmorStand.getUniqueId());
-
+        
 
         // Position for the armor bar (top)
         Location armorLocation = entity.getEyeLocation().add(0, 0.5, 0);
@@ -53,7 +48,6 @@ public class HealthBar {
             as.setCustomNameVisible(true);
             as.getPersistentDataContainer().set(key, PersistentDataType.STRING, ownerUUID);
         });
-        logger.info("[HB CREATE] Spawned armor stand " + armorArmorStand.getUniqueId());
 
         update();
     }
@@ -104,13 +98,13 @@ public class HealthBar {
     }
 
     public void remove() {
-        logger.info("[HB REMOVE] For " + entity.getName() + " (" + entity.getUniqueId() + ")");
+        
         if (healthArmorStand != null) {
-            logger.info("[HB REMOVE] Removing health stand " + healthArmorStand.getUniqueId());
+            
             healthArmorStand.remove();
         }
         if (armorArmorStand != null) {
-            logger.info("[HB REMOVE] Removing armor stand " + armorArmorStand.getUniqueId());
+           
             armorArmorStand.remove();
         }
     }

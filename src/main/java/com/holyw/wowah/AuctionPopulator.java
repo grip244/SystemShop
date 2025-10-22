@@ -170,6 +170,14 @@ public class AuctionPopulator {
         double tierBasePrice = plugin.getPricingManager().getBasePriceForTier(tierName);
         int tierOrdinal = Arrays.asList("TRASH", "COMMON", "COPPER", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC").indexOf(tierName);
 
+        // Mythic item upgrade logic
+        double mythicChance = plugin.getConfig().getDouble("population.mythic-item-chance", 0.08);
+        List<String> highTiers = Arrays.asList("RARE", "EPIC", "LEGENDARY");
+
+        if (highTiers.contains(tierName) && random.nextDouble() < mythicChance) {
+            tierName = "MYTHIC";
+        }
+
         if ("MYTHIC".equals(tierName)) {
             if (item.getType() == Material.ENCHANTED_BOOK) {
                 ItemMeta meta = item.getItemMeta();
@@ -219,7 +227,15 @@ public class AuctionPopulator {
 
             for (Enchantment enchantment : possibleEnchantments) {
                 boolean conflicts = false;
-                if (!allowUnsafe) {
+
+                if (allowUnsafe) {
+                    // If unsafe is allowed, only check for the specific Fortune/Silk Touch conflict
+                    if ((enchantment.equals(Enchantment.SILK_TOUCH) && appliedEnchantments.contains(Enchantment.FORTUNE)) ||
+                        (enchantment.equals(Enchantment.FORTUNE) && appliedEnchantments.contains(Enchantment.SILK_TOUCH))) {
+                        conflicts = true;
+                    }
+                } else {
+                    // If unsafe is not allowed, check for all conflicts
                     for (Enchantment applied : appliedEnchantments) {
                         if (enchantment.conflictsWith(applied)) {
                             conflicts = true;

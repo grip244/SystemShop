@@ -92,12 +92,15 @@ events:
 
 # Scoreboard settings for the SystemShop sidebar
 scoreboard:
-  enabled: true # Sidebar scoreboard enabled
+  enabled: true
   update-interval-seconds: 5
   lines:
+    - "&e&lYour Stats"
+    - "&7Balance: &f%vault_eco_balance_formatted%"
+    - ""
+    - "&e&lShop Info"
     - "&7Total items: &f%systemshop_total_items%"
     - "&7On sale: &f%systemshop_items_on_sale%"
-    - "&7Diamond: &f%systemshop_price_DIAMOND%"
     - "&7Market: &f%systemshop_market_status%"
   # Permission to opt-out per player; players with this permission will NOT see the scoreboard
   opt-out-permission: "systemshop.scoreboard.optout"
