@@ -40,3 +40,4 @@
 /target/classes/com/holyw/wowah/HealthBar.class
 /target/classes/com/holyw/wowah/HealthBarListener.class
 /target/classes/com/holyw/wowah/HealthBarManager.class
+/target/classes/com/holyw/wowah/MOTDListener.class
